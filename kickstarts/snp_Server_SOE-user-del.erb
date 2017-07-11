@@ -1,0 +1,20 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-user-del
+%>
+
+<%# Snippet to ensure unwanted system accounts are removed -%>
+
+# Other users or groups can be added to this list if required
+USER_DEL="ftp news uucp operator games gopher pcap"
+
+for user in $USER_DEL
+do
+    if grep ^$user /etc/passwd > /dev/null
+    then
+        # remove user
+        userdel $user
+        # remove group
+        groupdel $user
+    fi
+done

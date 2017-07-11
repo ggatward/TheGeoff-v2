@@ -1,0 +1,65 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-yum_update_schedule
+%>
+
+<%#Create a yum update schedule-%>
+
+
+# Purpose: Create a custom schedule to run yum-cron
+#          The yum-cron package will be installed and a custom daily schedule will be applied.
+# Default Update Profile :  "default" = yum upgrade
+# Assume: Time for the server is UTC and schedule will be adjusted relative to local time of GMT +10
+# Actions:
+# 1. Install the yum cron package this requires the rhel-6/7-server-optional-rpms repo
+# 2. Enable yum cron service on reboot
+# 3. RHEL7 to apply updates to yes and randomnwait to 60 , other options remain default
+# 4. RHEL6 options remain at default
+# 5. RHEL7 Remove the move daily and remove hourly configuration files added by install of the yum cron package
+# 6. Add schedule to run the job in /etc/cron.d
+
+echo "Starting yum auto update configuration"
+<%  os_major = @host.operatingsystem.major.to_i %>
+
+<% if os_major >= 7 -%>
+yum install -q -y yum-cron
+systemctl enable yum-cron.service
+
+#edit default configuration file for RHEL 7 /etc/yum/yum-cron.conf
+#Example to change update policy:
+#sed -i 's|^update_cmd = default|update_cmd = minimal-security|' /etc/yum/yum-cron.conf
+
+sed -i 's|^apply_updates = no|apply_updates = yes|' /etc/yum/yum-cron.conf
+sed -i 's|^random_sleep = 360|random_sleep = 60|' /etc/yum/yum-cron.conf
+
+#move the original daily schedule script to /usr/sbin/ so we call it via cron.d
+mv /etc/cron.daily/0yum-daily.cron /usr/sbin/yum_update_schedule
+#remove the original hourly scripts only for RHEL7
+rm /etc/yum/yum-cron-hourly.conf /etc/cron.hourly/0yum-hourly.cron
+<% else -%>
+
+yum install -q -y yum-cron
+chkconfig yum-cron on
+
+#RHEL 6 No config changes from default
+
+#move the original daily script to /usr/sbin/ so we call it via cron.d
+mv /etc/cron.daily/0yum.cron /usr/sbin/yum_update_schedule
+<% end -%>
+
+# Setup Schedule
+# Run at yumcron 4am each Wed,Thur. Satellite publishes/promotes new content on Tuesdays UTC+10.
+# Schedule
+# 18:00 UTC Tues = 4:00 SYD Wed
+# 18:00 UTC Wed = 4:00 SYD Thu
+echo "#Automatic Daily Yum Update schedule using UTC Relative to Local Time" > /etc/cron.d/0yumupdateschedule
+echo "#18:00 UTC Tues = 4:00 SYD Wed" >> /etc/cron.d/0yumupdateschedule
+echo "#18:00 UTC Wed = 4:00 SYD Thu" >> /etc/cron.d/0yumupdateschedule
+echo "#If you are not using UTC time you will need to adjust this schedule" >> /etc/cron.d/0yumupdateschedule
+echo "0 18 * * Tue,Wed root /usr/sbin/yum_update_schedule" >> /etc/cron.d/0yumupdateschedule
+
+echo "Finished yum auto update configuration"
+
+
+<%# End Create yum update schedule -%>
+

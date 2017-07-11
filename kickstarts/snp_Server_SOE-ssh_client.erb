@@ -1,0 +1,31 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-ssh_client
+%>
+# This is the ssh client system-wide configuration file.  See
+# ssh_config(5) for more information.  This file provides defaults for
+# users, and the values can be changed in per-user configuration files
+# or on the command line.
+#
+
+# The default configuration for all hosts follows:
+Host *
+        HostKeyAlgorithms ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa
+        KexAlgorithms ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1
+        Ciphers aes256-ctr
+## NOTE: RHEL 5 and Solaris 10 require hmac-sha1 to be available.
+        MACs hmac-sha2-512,hmac-sha2-256,hmac-sha1
+
+## The following configuration is RHEL defaults...
+
+        GSSAPIAuthentication yes
+# If this option is set to yes then remote X11 clients will have full access
+# to the original X11 display. As virtually no X11 client supports the untrusted
+# mode correctly we set this to yes.
+        ForwardX11Trusted yes
+# Send locale-related environment variables
+        SendEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+        SendEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+        SendEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+        SendEnv XMODIFIERS
+

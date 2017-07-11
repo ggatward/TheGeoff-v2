@@ -1,0 +1,24 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-postfix
+%>
+echo "Starting postfix configuration"
+
+<%  os_major = @host.operatingsystem.major.to_i %>
+
+<%# Install mutt mail client -%>
+yum install -q -y mutt
+
+<%# Disable postfix running by default in the SOE -%>
+<% if os_major >= 7 -%>
+systemctl stop postfix.service
+systemctl disable postfix.service
+
+<% else -%>
+service postfix stop
+chkconfig postfix off
+
+<% end -%>
+
+echo "Finished postfix configuration"
+

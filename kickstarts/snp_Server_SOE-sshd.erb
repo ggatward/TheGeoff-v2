@@ -1,0 +1,89 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-sshd
+%>
+# This is the sshd server system-wide configuration file.  See
+# sshd_config(5) for more information.
+
+## note: This file has been carefully security hardened to best meet the ISM and
+## works on both RHEL 6 & RHEL 7 with clients including RHEL 5 and Solaris 10 U11.
+
+Port 22
+# If you want to change the port on a SELinux system, you have to tell
+# SELinux about this change.
+# semanage port -a -t ssh_port_t -p tcp #PORTNUMBER
+
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+
+KexAlgorithms ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1
+Ciphers aes256-ctr
+MACs hmac-sha2-512,hmac-sha2-256,hmac-sha1
+
+#AddressFamily any
+Protocol 2
+#ListenAddress  <-- Set this if your system has multiple interfaces but should only listen to SSH on one!
+AllowTCPForwarding no
+GatewayPorts no
+PermitRootLogin yes
+HostbasedAuthentication no
+IgnoreRhosts yes
+PermitEmptyPasswords no
+Banner /etc/issue
+LoginGraceTime 60
+X11Forwarding no
+
+## Logging :
+#SyslogFacility AUTH
+SyslogFacility AUTHPRIV
+#LogLevel INFO
+
+## Authentication:
+#StrictModes yes
+#MaxAuthTries 6
+#MaxSessions 10
+#RSAAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile  .ssh/authorized_keys
+AuthorizedKeysCommand none
+#AuthorizedKeysCommandRunAs nobody
+PasswordAuthentication yes
+## Disable S/KEY one-time passwords
+ChallengeResponseAuthentication no
+
+# Kerberos options
+KerberosAuthentication no
+#KerberosOrLocalPasswd yes
+#KerberosTicketCleanup yes
+#KerberosGetAFSToken no
+#KerberosUseKuserok yes
+
+# GSSAPI options
+#GSSAPIAuthentication no
+GSSAPIAuthentication yes
+#GSSAPICleanupCredentials yes
+GSSAPICleanupCredentials yes
+#GSSAPIStrictAcceptorCheck yes
+#GSSAPIKeyExchange no
+
+# WARNING: 'UsePAM no' is not supported in Red Hat Enterprise Linux and may cause several problems
+UsePAM yes
+
+# Accept locale-related environment variables
+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+AcceptEnv XMODIFIERS
+
+#AllowAgentForwarding yes
+#UsePrivilegeSeparation yes
+
+ClientAliveInterval 172800
+ClientAliveCountMax 0
+PrintLastLog no
+
+# override default of no subsystems
+Subsystem sftp /usr/libexec/openssh/sftp-server
+
+PermitUserEnvironment no
+

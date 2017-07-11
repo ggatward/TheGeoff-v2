@@ -1,0 +1,570 @@
+##				UNCLASSIFIED
+##
+## Audit Rules: Linux
+##
+## This was developed for RHEL type systems. As other flavors of Linux are
+## encountered, the file will be appropriately annotated.
+##
+## Change Log:
+##	20140717 baaltin
+##		Time changes with auid!=4294967295 are ignored (same for 32bit)
+##	20140620 baaltin
+##		Ignore execve's with -2 error code to cater for those execve's
+##		that attempt to find a binary in all the processes' path
+##		directories. IE add -F exit!=-2 for execve
+##      20140527 baaltin
+##		Add comments regards filewatches at the bottom
+##		No long monitor deletes/renames and unset execve's by default
+##	20131019 baaltin
+##		Support SELinux by not excluding AVC
+##	20130910 baaltin
+##		Added comments on file watches
+##	20130130 baaltin
+##		Added monitoring of opens for write and creat - key wropen
+##	20121126 baaltin
+##		Added more specific file monitoring
+##		Added more specific command execution
+##	20121115 baaltin
+##		We don't want auid=0 for file permission changes key 'perm_mod'
+##	20121101 baaltin Initial release
+##
+## Notes:
+## 1. Create efficient rules. When sent into the kernel, all syscall fields are
+##    put into a mask so that one compare can determine if the syscall is  of
+##    interest. So, adding multiple syscalls in one rule is very efficient.
+## 2. See the section on PAM checks below
+## 3. Add file system 'watches' near the end of this file, where indicated.
+##    You should NOT re-use a key (-k) for these file watches.
+## 4. If this is being used on a 32 bit machine, comment out the b64 lines
+## 5. If these rules generate too much spurious data for your tastes, limit the
+##    the syscall file rules with a directory, like -F dir=/etc
+## 6. Document your audit rules.
+##
+
+## First rule - delete all
+-D
+
+## Increase the buffers to survive stress events.
+## Make this bigger for busy systems
+-b 32768
+
+## Set failure mode to console prints - printk (1)
+## Example conditions where this flag is consulted includes: transmission
+## errors to userspace audit daemon, backlog limit exceeded, out of kernel
+## memory, and rate limit exceeded. 
+-f 1
+
+##
+## PAM and audit ID tracking:
+##
+## Audit allows you to consistently track a user's actions from
+## login right through logout no matter which identities this
+## user might adopt by using audit IDs that are created upon
+## login and handed down to any child process of the original
+## login process. Modify the PAM configuration of several
+## components (login, sshd, gdm, crond, and atd). Open the
+## PAM configuration for each application (/etc/pam.d/
+## application) and add the following line before the
+## common-session line:
+##
+## session required pam_loginuid.so
+## session include common-session
+##
+## The changes in PAM configuration take effect as soon as
+## the application is called again, for example, login, sshd, and
+## the display managers log with an audit ID at the next login.
+##
+## For example, a the sshd pam config for RHEL 5.4 is
+## cat /etc/pam.d/sshd
+## #%PAM-1.0
+## auth       include      system-auth
+## account    required     pam_nologin.so
+## account    include      system-auth
+## password   include      system-auth
+## session    optional     pam_keyinit.so force revoke
+## session    include      system-auth
+## session    required     pam_loginuid.so
+##
+## For example, a the sshd pam config for Centos 6.3 is
+## cat /etc/pam.d/sshd
+## #%PAM-1.0
+## auth       required     pam_sepermit.so
+## auth       include      password-auth
+## account    required     pam_nologin.so
+## account    include      password-auth
+## password   include      password-auth
+## # pam_selinux.so close should be the first session rule
+## session    required     pam_selinux.so close
+## session    required     pam_loginuid.so
+## # pam_selinux.so open should only be followed by sessions to be executed in the user context
+## session    required     pam_selinux.so open env_params
+## session    optional     pam_keyinit.so force revoke
+## session    include      password-auth
+
+
+
+##
+## (GEN002880: CAT II) The IAO will ensure the auditing software can
+## record the following for each audit event: 
+##- Date and time of the event 
+##- Userid that initiated the event 
+##- Type of event 
+##- Success or failure of the event 
+##- For I&A events, the origin of the request (e.g., terminal ID) 
+##- For events that introduce an object into a user’s address space, and
+##  for object deletion events, the name of the object, and in MLS
+##  systems, the object’s security level.
+##
+
+# Currently (Nov 2012) we do this on specific system calls below
+# in case we loose audit from other rules where the system cant work
+# out the audit user.
+# Don't audit daemon processes - 64 bit OS
+# -a exit,never -F auid=4294967295
+# Don't audit daemon processes - 32 bit OS
+# -a exit,never -F auid=2147483647
+
+##
+# The following rules drop events which are better described
+# by other message types, reducing throughput for low-use systems.
+-a exclude,always -F msgtype=LOGIN
+-a exclude,always -F msgtype=CRED_ACQ
+-a exclude,always -F msgtype=CRED_DISP
+-a exclude,always -F msgtype=USER_ACCT
+# 20131019 baaltin
+# SELinux requires AVC events to support it's analysis capability
+# -a exclude,always -F msgtype=AVC
+-a exclude,always -F msgtype=TTY
+-a exclude,always -F msgtype=USER_TTY
+
+## Things that could affect time
+## Description:
+## Capture events where the system date and/or time has been modified. The parameters in
+## this section are set to determine if the adjtimex (tune kernel clock), settimeofday (Set
+## time, using timeval and timezone structures) stime (using seconds since 1/1/1970) or
+## clock_settime (allows for the setting of several internal clocks and timers) system calls
+## have been executed and always write an audit record to the /var/log/audit.log file
+## upon exit, tagging the records with the identifier "time-change"
+## Rationale:
+## Unexpected changes in system data and/or time could be a sign of malicious activity on the
+## system.
+
+-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -S clock_settime -F auid!=2147483647 -k time-change
+#-a always,exit -F arch=b32 -S clock_settime -k time-change
+-a always,exit -F arch=b64 -S adjtimex -S settimeofday -S clock_settime -F auid!=4294967295 -k time-change
+#-a always,exit -F arch=b64 -S clock_settime -k time-change
+-w /etc/localtime -p wa -k time-change
+
+## Things that affect identity
+## Description:
+## Record events affecting the group, passwd (user IDs), shadow and gshadow
+## (passwords) or /etc/security/opasswd (old passwords, based on remember
+## parameter in the PAM configuration) files. The parameters in this section will watch the
+## files to see if they have been opened for write or have had attribute changes (e.g.
+## permissions) and tag them with the identifier "identity" in the audit log file.
+## Rationale:
+## Unexpected changes to these files could be an indication that the system has been
+## compromised and that an unauthorized user is attempting to hide their activities or
+## compromise additional accounts.
+
+-w /etc/group -p wa -k identity
+-w /etc/passwd -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/security/opasswd -p wa -k identity
+
+
+## Things that could affect system locale
+## Description:
+## Record changes to network environment files or system calls. The below parameters
+## monitor the sethostname (set the systems host name) or setdomainname (set the systems
+## domainname) system calls, and write an audit event on system call exit. The other
+## parameters monitor the /etc/issue and /etc/issue.net files (messages displayed
+## pre-login), /etc/hosts (file containing host names and associated IP addresses) and
+## /etc/sysconfig/network (directory containing network interface scripts and
+## configurations) files.
+## Rationale:
+## Monitoring sethostname and setdomainname will identify potential unauthorized
+## changes to host and domainname of a system. The changing of these names could
+## potentially break security parameters that are set based on those names. The
+## /etc/hosts file is monitored for changes in the file that can indicate an unauthorized
+## intruder is trying to change machine associations with IP addresses and trick users and
+## processes into connecting to unintended machines. Monitoring /etc/issue and
+## /etc/issue.net is important, as intruders could put disinformation into those files and
+## trick users into providing information to the intruder. Monitoring
+## /etc/sysconfig/network is important as it can show if network interfaces or scripts
+## are being modified in a way that can lead to the machine becoming unavailable or
+## compromised. All audit records will be tagged with the identifier "system-locale."
+
+-a exit,always -F arch=b32 -S sethostname -S setdomainname -k system-locale
+-a exit,always -F arch=b64 -S sethostname -S setdomainname -k system-locale
+-w /etc/issue -p wa -k system-locale
+-w /etc/issue.net -p wa -k system-locale
+-w /etc/hosts -p wa -k system-locale
+-w /etc/sysconfig/network -p wa -k system-locale
+
+## Things that could affect MAC policy
+## Description:
+## Monitor SELinux mandatory access controls. The parameters below monitor any write
+## access (potential additional, deletion or modification of files in the directory) or attribute
+## changes to the /etc/selinux directory.
+## Rationale:
+## Changes to files in this directory could indicate that an unauthorized user is attempting to
+## modify access controls and change security contexts, leading to a compromise of the
+## system.
+
+-w /etc/selinux/ -p wa -k MAC-policy
+
+
+## (GEN002900: CAT III) The IAO will ensure audit files are retained at
+## least one year; systems containing SAMI will be retained for five years.
+##
+## Site action - no action in config files
+
+## (GEN002920: CAT III) The IAO will ensure audit files are backed up
+## no less than weekly onto a different system than the system being
+## audited or backup media.  
+##
+## Can be done with cron script
+
+## (GEN002700: CAT I) (Previously – G095) The SA will ensure audit data
+## files have permissions of 640, or more restrictive.
+##
+## Done automatically by auditd
+
+## (GEN002720-GEN002840: CAT II) (Previously – G100-G106) The SA will
+## configure the auditing system to audit the following events for all
+## users and root:
+##
+## - Logon (unsuccessful and successful) and logout (successful)
+##
+## Handled by pam, sshd, login, and gdm
+## Might also want to watch these files if needing extra information
+## Description:
+## Monitor login and logout events. The parameters below track changes to files associated
+## with login/logout events. The file /var/log/faillog tracks failed events from login.
+## The file /var/log/lastlog maintain records of the last time a user successfully logged
+## in. The file /var/log/btmp keeps track of failed login attempts and can be read by
+## entering the command /usr/bin/last -f /var/log/btmp. All audit records will be
+## tagged with the identifier "logins."
+## Rationale:
+## Monitoring login/logout events could provide a system administrator with information
+## associated with brute force attacks against user logins.
+
+-w /var/log/faillog -p wa -k logins
+-w /var/log/lastlog -p wa -k logins
+
+
+##- Process and session initiation (unsuccessful and successful)
+##
+## The session initiation is audited by pam without any rules needed.
+## Might also want to watch this file if needing extra information
+## Description:
+## Monitor session initiation events. The parameters in this section track changes to the files
+## associated with session events. The file /var/run/utmp file tracks all currently logged in
+## users. The /var/log/wtmp file tracks logins, logouts, shutdown and reboot events. All
+## audit records will be tagged with the identifier "session."
+## Rationale:
+## Monitoring these files for changes could alert a system administrator to logins occurring at
+## unusual hours, which could indicate intruder activity (i.e. a user logging in at a time when
+## they do not normally log in).
+
+-w /var/run/utmp -p wa -k session
+-w /var/log/btmp -p wa -k session
+-w /var/log/wtmp -p wa -k session
+
+##- Discretionary access control permission modification (unsuccessful
+## and successful use of chown/chmod)
+## Description:
+## Monitor changes to file permissions, attributes, ownership and group. The parameters in
+## this section track changes for system calls that affect file permissions and attributes. The
+## chmod, fchmod and fchmodat system calls affect the permissions associated with a file.
+## The chown, fchown, fchownat and lchown system calls affect owner and group
+## attributes on a file. The setxattr, lsetxattr, fsetxattr (set extended file
+## attributes) and removexattr, lremovexattr, fremovexattr (remove extended file
+## attributes) control extended file attributes. In all cases, an audit record will only be written
+## for non-root userids (auid != 0) and will ignore Daemon events (auid = 4294967295).
+## All audit records will be tagged with the identifier "perm_mod."
+## Rationale:
+## Monitoring for changes in file attributes could alert a system administrator to activity that
+## could indicate intruder activity or policy violation.
+
+-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -S chown -S fchown -S fchownat -S lchown -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid!=0 -F auid!=4294967295 -k perm_mod
+#-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid!=4294967295 -k perm_mod
+#-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -S chown -S fchown -S fchownat -S lchown -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid!=0 -F auid!=4294967295 -k perm_mod
+#-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid!=4294967295 -k perm_mod
+#-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid!=4294967295 -k perm_mod
+
+##- Unauthorized access attempts to files (unsuccessful) 
+## Description:
+## Monitor for unsuccessful attempts to access files. The parameters below are associated
+## with system calls that control creation (creat), opening (open, openat) and truncation
+## (truncate, ftruncate) of files. An audit log record will only be written if the user 
+## is not a Daemon event (auid=4294967295) and if the
+## system call returned EACCES (permission denied to the file) or EPERM (some other
+## permanent error associated with the specific system call). All audit records will be tagged
+## with the identifier "access."
+## Rationale:
+## Failed attempts to open, create or truncate files could be an indication that an individual or
+## process is trying to gain unauthorized access to the system.
+
+##
+-a always,exit -F arch=b32 -S open -S openat -S creat -S truncate -S ftruncate -F exit=-EACCES -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S open -S openat -S creat -S truncate -S ftruncate -F exit=-EPERM -F auid!=4294967295 -k access
+-a always,exit -F arch=b64 -S open -S openat -S creat -S truncate -S ftruncate -F exit=-EACCES -F auid!=4294967295 -k access
+-a always,exit -F arch=b64 -S open -S openat -S creat -S truncate -S ftruncate -F exit=-EPERM -F auid!=4294967295 -k access
+
+## If we want to monitor all open/create/truncate then use the following
+## and comment out the above
+## -a always,exit -F arch=b32 -S open -S openat -S creat -S truncate -S ftruncate -F auid!=4294967295 -k access
+## -a always,exit -F arch=b64 -S open -S openat -S creat -S truncate -S ftruncate -F auid!=4294967295 -k access
+
+## If we just want to concentrate on non RDONLY access. This could be used
+## to support DLP analysis. The risk is the amount of creat's and opens for writes
+## -a always,exit -F arch=b32 -S open -F a1&3 -F auid!=4294967295 -k wropen
+## -a always,exit -F arch=b64 -S open -F a1&3 -F auid!=4294967295 -k wropen
+## -a always,exit -F arch=b32 -S openat -F a2&3 -F auid!=4294967295 -k wropen
+## -a always,exit -F arch=b64 -S openat -F a2&3 -F auid!=4294967295 -k wropen
+## -a always,exit -F arch=b64 -S creat -F auid!=4294967295 -k wropen
+## -a always,exit -F arch=b32 -S creat -F auid!=4294967295 -k wropen
+
+##- Use of privileged commands (unsuccessful and successful)
+## Description:
+## Monitor privileged programs (those that have the setuid and/or setgid bit set on execution)
+## to determine if unprivileged users are running these commands.
+## Rationale:
+## Execution of privileged commands by non-privileged users could be an indication of
+## someone trying to gain unauthorized access to the system.
+## use find /bin -type f -perm -04000 2>/dev/null and put all those files in a rule like this
+## or
+## find PART -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
+## "-a always,exit -F path=" $1 " -F perm=x -F auid!=4294967295 -k privileged" }'
+##
+##-a always,exit -F path=/bin/ping -F perm=x -F auid!=4294967295 -k privileged
+
+##- Use of print command (unsuccessful and successful) 
+
+##- Export to media (successful)
+## You have to mount media before using it. You must disable all automounting
+## so that its done manually in order to get the correct user requesting the
+## export
+## Description:
+## Monitor the use of the mount system call. The mount (and umount) system call controls
+## the mounting and unmounting of file systems. The parameters below configure the system
+## to create an audit record when the mount system call is used by a non-privileged user
+## Rationale:
+## It is highly unusual for a non privileged user to mount file systems to the system. While
+## tracking mount commands gives the system administrator evidence that external media
+## may have been mounted (based on a review of the source of the mount and confirming it’s
+## an external media type), it does not conclusively indicate that data was exported to the
+## media. System administrators who wish to determine if data were exported, would also
+## have to track successful open, creat and truncate system calls requiring write access
+## to a file under the mount point of the external media file system. This could give a fair
+## indication that a write occurred. The only way to truly prove it, would be to track
+## successful writes to the external media. Tracking write system calls could quickly fill up the
+## audit log and is not recommended. Recommendations on configuration options to track
+## data export to media is beyond the scope of this document.
+## Note:
+## This tracks successful and unsuccessful mount commands. File system mounts do not have
+## to come from external media and this action still does not verify write (e.g. CD ROMS)
+
+-a always,exit -F arch=b32 -S mount -S umount -S umount2 -k export
+-a always,exit -F arch=b64 -S mount -S umount2 -k export
+
+##- System startup and shutdown (unsuccessful and successful)
+
+##- Files and programs deleted by the user (successful and unsuccessful)
+## Description:
+## Monitor the use of system calls associated with the deletion or renaming of files and file
+## attributes. This configuration statement sets up monitoring for the unlink (remove a file),
+## unlinkat (remove a file attribute), rename (rename a file) and renameat (rename a file
+## attribute) system calls and tags them with the identifier "delete".
+## Rationale:
+## Monitoring these calls from non-privileged users could provide a system administrator
+## with evidence that inappropriate removal of files and file attributes associated with
+## protected files is occurring. While this audit option will look at all events, system
+## administrators will want to look for specific privileged files that are being deleted or
+## altered.
+## 20140527 baaltin
+## We no longer monitor deletions or renames by default
+
+# -a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid!=4294967295 -k delete
+# -a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid!=4294967295 -k delete
+
+##- All system administration actions 
+##- All security personnel actions
+## 
+## Look for pam_tty_audit and add it to your login entry point's pam configs.
+## If that is not found, use sudo which should be patched to record its
+## commands to the audit system. Do not allow unrestricted root shells or
+## sudo cannot record the action.
+## Description:
+## Monitor scope changes for system administrations. If the system has been properly
+## configured to force system administrators to log in as themselves first and then use the
+## sudo command to execute privileged commands, it is possible to monitor changes in scope.
+## The file /etc/sudoers will be written to when the file or its attributes have changed. The
+## audit records will be tagged with the identifier "scope."
+## Rationale:
+## Changes in the /etc/sudoers file can indicate that an unauthorized change has been
+## made to scope of system administrator activity.
+
+-w /etc/sudoers -p wa -k actions
+
+## (GEN002860: CAT II) (Previously – G674) The SA and/or IAO will
+##ensure old audit logs are closed and new audit logs are started daily.
+##
+## Site action. Can be assisted by a cron job
+
+## Not specifically required by the STIG; but common sense items
+## Optional - could indicate someone trying to do something bad or
+## just debugging
+# Note that entry is deprecated, use exit instead.
+#-a entry,always -F arch=b32 -S ptrace -k tracing
+#-a entry,always -F arch=b64 -S ptrace -k tracing
+-a exit,always -F arch=b32 -S ptrace -k tracing
+-a exit,always -F arch=b64 -S ptrace -k tracing
+
+##
+## Description:
+## Monitor the loading and unloading of kernel modules. The programs insmod (install a
+## kernel module), rmmod (remove a kernel module), and modprobe (a more sophisticated
+## program to load and unload modules, as well as some other features) control loading and
+## unloading of modules. The init_module (load a module) and delete_module (delete a
+## module) system calls control loading and unloading of modules. Any execution of the
+## loading and unloading module programs and system calls will trigger an audit record with
+## an identifier of "modules".
+## Rationale:
+## Monitoring the use of insmod, rmmod and modprobe could provide system
+## administrators with evidence that an unauthorized user loaded or unloaded a kernel
+## module, possibly compromising the security of the system. Monitoring of the
+## init_module and delete_module system calls would reflect an unauthorized user
+## attempting to use a different program to load and unload modules.
+-w /sbin/insmod -p x -k modules
+-w /sbin/rmmod -p x -k modules
+-w /sbin/modprobe -p x -k modules
+-a always,exit -F arch=b64 -S init_module -S delete_module -k modules
+-a always,exit -F arch=b32 -S init_module -S delete_module -k modules
+
+## Optional - could be an attempt to bypass audit or simply legacy program
+#-a always,exit -F arch=b32 -S personality -k bypass
+#-a always,exit -F arch=b64 -S personality -k bypass
+
+## Generate execution audit
+##
+## 20140527 baaltin
+## Drop the unset user monitoring within execve by default
+## 20140620 baaltin
+## Ignore execve's with -2 error code to cater for those execve's
+## that attempt to find a binary in all the processes' path directories.
+
+-a exit,always -F arch=b32 -F auid!=2147483647 -F exit!=-2 -S execve -k cmds
+-a exit,always -F arch=b64 -F auid!=4294967295 -F exit!=-2 -S execve -k cmds
+
+##
+## SYSTEM FILE WATCHES:
+## (Application file watches should appear near the end of the this section)
+# -w /your-file -p rwxa -k mykey
+# First the change (and execution) of certain privledged commands
+-w /usr/bin/ssh -p xwa -k privileged
+-w /usr/bin/sftp -p xwa -k privileged
+-w /usr/bin/scp -p xwa -k privileged
+-w /usr/bin/telnet -p xwa -k privileged
+-w /usr/bin/ftp -p xwa -k privileged
+-w /usr/bin/yum -p xwa -k privileged
+-w /usr/bin/rpm -p xwa -k privileged
+-w /usr/sbin/tcpdump -p xwa -k privileged
+-w /usr/bin/nc -p xwa -k privileged
+-w /sbin/auditctl -p xwa -k privileged
+-w /sbin/autrace -p xwa -k privileged
+-w /usr/sbin/passwd -p xwa -k privileged
+-w /usr/sbin/userdel -p xwa -k privileged
+-w /usr/sbin/useradd -p xwa -k privileged
+-w /usr/sbin/groupadd -p xwa -k privileged
+-w /usr/sbin/usermod -p xwa -k privileged
+
+
+# Next we monitor access to audit configuation files
+-w /etc/audit/auditd.conf -p wa -k aupolicy
+-w /etc/audit/audit.rules -p wa -k aupolicy
+-w /sbin/edispatch -p wxa -k aupolicy
+-w /sbin/audispd -p wa -k aupolicy
+-w /sbin/auditd -p wa -k aupolicy
+-w /sbin/rsyslogd -p wa -k aupolicy
+-w /etc/rsyslog.conf -p wa -k aupolicy
+-w /etc/rsyslog.d -k aupolicy
+-w /etc/syslog.conf -p wa -k aupolicy
+
+-w /var/log/audit -p wa -k Log_Tampering
+
+# Next configuration of SSH and PAM
+-w /etc/ssh/sshd_config -p wa -k SSH_Mods
+-w /etc/ssh/ssh_config -p wa -k SSH_Mods
+-w /etc/pam.d -p wa -k PAM_Mods
+
+# Next system boot areas
+-w /boot -k BOOT_Mods
+-w /boot/grub2/grub.cfg -p war -k BOOT_Mods
+
+# Next monitor all security configs - access, console, groups etc
+-w /etc/security -p wa -k Security_Mods
+
+# Next monitor all sysconfig configs as this enable major functional changes to
+# a number of applications including iptables syslog selinux
+-w /etc/sysconfig -p wa -k Sysconfig_Mods
+
+# Next monitor loader configuration file so that users cannot tell applications
+# to use different libraries
+-w /etc/ld.so.conf.d -p wa -k Library_Mods
+
+# Next monitor to ensure applications cannot be made to start at boot
+-w /etc/inittab -p wa -k StartUp_Mods
+-w /etc/rc.d -p wa -k StartUp_mods
+
+##
+## APPLICATION FILE WATCHES:
+##
+## Should be of the form
+##   -w path-to-file -p permissions -k keyname
+## where the permission are any one of the following:
+##    r - read of the file
+##    w - write to the file
+##    x - execute the file
+##    a - change in the file’s attribute
+## Ensure the keys do not clash with keys already in use.
+##
+## The following keynames should be used dependant on the file being watched
+##
+## 	Key		File Type
+##	Sens_Config	For sensitive configuration files
+##	Sens_Data	For sensitive data files
+##
+## Examples may be
+##
+##    # Monitor all reads, writes and attribute changes to the keystore file
+##    # "/some_path/keystore.jks"
+##      -w /some_path/keystore.jks -p rwa -k Sens_Config
+##    # Monitor all reads, writes and attribute changes to all files created
+##    # within the '/data/special_files' directory tree (and below)
+##      -a exit,always -F dir=/data/special_files/ -F perm=rwa -k Sens_Data
+##    # Monitor all reads, writes and attribute changes to all files created
+##    # within the '/data/special_files' directory tree (and below) but exclude
+##    # the user 'ignoreme'
+##      -a exit,always -F dir=/data/special_files/ -F perm=rwa -k Sens_Data -F auid!=ignoreme
+##  
+
+## If augenrules is deployed, then these directives should be in a file of
+## their own in /etc/audit/rules.d in a file, local.rules
+##
+
+
+##
+## CONFIGURATION CHANGE:
+## Make the configuration immutable - reboot is required to change audit rules
+# This would be -e 2.
+# As we need to be able to change the audit config WITHOUT a reboot, we set
+# a value of -e 1
+
+-e 1
+
+##				UNCLASSIFIED

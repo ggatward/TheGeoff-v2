@@ -1,0 +1,217 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-access
+%>
+
+<%# Access and authentication configuration with ISM hardening -%>
+
+<% auth_ldap = @host.params['auth_ldap'] ? true : false %>
+<% auth_ad = @host.params['auth_ad'] ? true : false %>
+
+<%# Create initial access.conf -%>
+# Change PAM to use /etc/security/access.conf
+# Ideally --updateall is used when making a change to authconfig however in this case as there
+# is also a nsswitch/autofs workaround during the authconfig in the ldap snippet. --updateall in
+# this case overwrites that change. So here we just use --update
+
+<% if auth_ldap -%>
+authconfig --enablepamaccess --update
+
+CONFIGFILE="/etc/security/access.conf"
+
+cat >> ${CONFIGFILE} << EOL
+#
++ : root : ALL
++ : @role-unix-support : ALL
++ : @access-${HOSTNAME} : ALL
+# Allow switching to any account locally only.  Remote access for local accounts
+# If remote access is required for a local account, it must have its own entry here!
++ : ALL : LOCAL
+# gdm needs to have access just in case a GUI is ever installed.
++ : gdm : ALL
+- : ALL : ALL
+EOL
+
+chmod 0440 ${CONFIGFILE}
+restorecon ${CONFIGFILE}
+<%# End Create initial access.conf -%>
+
+<%# Configure sudo access -%>
+# sudo access
+echo "+role-unix-support    ALL=(ALL) ALL" > /etc/sudoers.d/role-unix-support
+echo "Defaults timestamp_timeout=15" >> /etc/sudoers.d/role-unix-support
+chmod 600 /etc/sudoers.d/role-unix-support
+
+# Globally change time before password is required for another sudo command: 5 -> 15 minutes.
+echo -e "Defaults timestamp_timeout=15\n" >> /etc/sudoers
+<% end -%>
+
+<% if auth_ad -%>
+authconfig --enablepamaccess --update
+
+CONFIGFILE="/etc/security/access.conf"
+
+cat >> ${CONFIGFILE} << EOL
+
++ : root : ALL
++ : AD.HOME.GATWARDS.ORG\admins : ALL
++ : AD.HOME.GATWARDS.ORG\access-${HOSTNAME} : ALL
+# Allow switching to any account locally only.  Remote access for local accounts
+# If remote access is required for a local account, it must have its own entry here!
++ : ALL : LOCAL
+# gdm needs to have access just in case a GUI is ever installed.
++ : gdm : ALL
+- : ALL : ALL
+EOL
+
+chmod 0440 ${CONFIGFILE}
+restorecon ${CONFIGFILE}
+<%# End Create initial access.conf -%>
+
+<%# Configure sudo access -%>
+# sudo access
+echo "%admins@ad.home.gatwards.org    ALL=(ALL) ALL" > /etc/sudoers.d/ad-admins
+echo "Defaults timestamp_timeout=15" >> /etc/sudoers.d/ad-admins
+chmod 600 /etc/sudoers.d/ad-admins
+
+# Globally change time before password is required for another sudo command: 5 -> 15 minutes.
+echo -e "Defaults timestamp_timeout=15\n" >> /etc/sudoers
+<% end -%>
+
+
+<%# Configure PAM -%>
+# RHEL uses 'include' in various service pam files to reference two main pam configuration files.
+# We will only customise these two main configuration files:
+for PAMFILE in /etc/pam.d/password-auth-ac /etc/pam.d/system-auth-ac
+do
+
+  ## Update comments to explain configuration and warn users about authconfig ######################
+  sed -i 's/^# This file is auto-generated./# This file has been customised to meet ISM requirements./' ${PAMFILE} || \
+   echo "PAM Snippet: Failed to add 1st comment to ${PAMFILE}"
+
+  ## Implement "Faillock" to prevent brute force login attacks #####################################
+  # 1/3 Second in the "auth" stack, after pam_env
+  sed -i '/^auth\s*required\s*pam_env.so/aauth        required      pam_faillock.so preauth silent deny=6 unlock_time=900 fail_interval=600' ${PAMFILE} || \
+   echo "PAM Snippet: Failed to add pam_failock 1/3 to ${PAMFILE}"
+
+  # 2/3 Second last in the "auth" stack, just before pam_deny
+  sed -i '/^auth\s*required\s*pam_deny.so$/iauth        [default=die] pam_faillock.so authfail deny=6 unlock_time=900 fail_interval=600' ${PAMFILE} || \
+   echo "PAM Snippet: Failed to add pam_failock 2/3 to ${PAMFILE}"
+
+  <% if auth_ldap -%>
+    # 3/3 Second in the "account" stack, after pam_access (no options are required for pam_faillock here here)
+    sed -i '/^account\s*required\s*pam_access.so$/aaccount     required      pam_faillock.so' ${PAMFILE} || \
+     echo "PAM Snippet: Failed to add pam_failock 3/3 to ${PAMFILE}"
+  <% elsif auth_ad -%>
+    # 3/3 Second in the "account" stack, after pam_access (no options are required for pam_faillock here here)
+    sed -i '/^account\s*required\s*pam_access.so$/aaccount     required      pam_faillock.so' ${PAMFILE} || \
+     echo "PAM Snippet: Failed to add pam_failock 3/3 to ${PAMFILE}"
+  <% else -%>
+    # 3/3 For IPA top of the "account" stack, after pam_access (no options are required for pam_faillock here here)
+    sed -i '/^account\s*required\s*pam_unix.so.*/iaccount     required      pam_faillock.so' ${PAMFILE} || \
+     echo "PAM Snippet: Failed to add pam_failock 3/3 to ${PAMFILE}"
+  <% end -%>
+
+  # Additional for RHEL 7 only due to differences in RHEL 7.1 and 7.2 default pam.d files. This removes additional lines which cause faillock not to work.
+  # Remove Line "auth     [default=1 success=ok] pam_localuser.so
+  # Replace Line "auth     [success=done ignore=ignore default=die] pam_unix.so try_first_pass with "auth  sufficient  pam_unix.so try_first_pass"
+  # Replace Line "auth     sufficient   pam_sss.so forward_pass" with "auth   sufficient  pam_sss.so use_first_pass"
+  <% if @host.operatingsystem.major.to_i >= 7 -%>
+  sed -i '/^auth\s*\[default.*pam_localuser.so/d' ${PAMFILE} || \
+   echo "PAM Snippet: Failed to remove RHEL 7 auth pam_localuser.so"
+  sed -i 's/^auth\s*\[success.*pam_unix.so.*/auth        sufficient    pam_unix.so try_first_pass/' ${PAMFILE} || \
+   echo "PAM Snippet: Failed to remove RHEL 7 auth pam_unix.so"
+  sed -i 's/^auth.*sufficient.*pam_sss.so\s*forward_pass.*/auth         sufficient    pam_sss.so use_first_pass/' ${PAMFILE} || \
+   echo "PAM Snippet: Failed to change RHEL 7 auth pam_sss.so forward_pass"
+  <% end -%>
+
+
+  ## Enforce password strength for local accounts with pam_cracklib ################################
+  <% if @host.operatingsystem.major.to_i >= 7 -%>
+    # Replace existing pam_pwquality which is first in the "password" stack.  This must be
+    #     before pam_unix.
+    sed -i 's/^password\s*requisite\s*pam_pwquality.so.*$/password    requisite     pam_pwquality.so try_first_pass local_users_only retry=5 difok=4 minlen=11 minclass=3 maxrepeat=3/' ${PAMFILE} || \
+     echo "PAM Snippet: Failed to replace default pam_pwquality entry in ${PAMFILE}"
+  <% else -%>
+    # On RHEL 6 replace default pam_cracklib entry which is first in the "password" stack
+    sed -i 's/^password\s*requisite\s*pam_cracklib.so.*$/password    requisite     pam_cracklib.so try_first_pass retry=5 difok=4 minlen=11 minclass=3 maxrepeat=3/' ${PAMFILE} || \
+     echo "PAM Snippet: Failed to replace default pam_cracklib entry in ${PAMFILE}"
+  <% end -%>
+
+  ## Prevent password reuse ########################################################################
+  <% if @host.operatingsystem.major.to_i >= 7 -%>
+    # On RHEL 7 use pam_pwhistory instead of the pam_unix "remember" option
+    # 1/2 Remove the "remember" option from the pam_unix module if it exists
+    sed -i '/^password\s*sufficient\s*pam_unix.so.*$/{s/ remember=[0-9]\{1,2\}//}' ${PAMFILE} || \
+     echo "PAM Snippet: Failed pam_pwhistory change 1/2 in ${PAMFILE}"
+    # 2/2 Second entry in the "password" stack on RHEL 7 after pam_pwquality and before pam_unix
+    sed -i '/^password\s*requisite\s*pam_pwquality.so.*$/apassword    requisite     pam_pwhistory.so use_authtok remember=8' ${PAMFILE} || \
+     echo "PAM Snippet: Failed pam_pwhistory change 2/2 in ${PAMFILE}"
+  <% else -%>
+    # On RHEL 6 append the "remember=8" option to the pam_unix entry in the "password" stack
+    sed -i '/^password\s*sufficient\s*pam_unix.so.*$/{s/$/ remember=8/}' ${PAMFILE} || \
+     echo "PAM Snippet: Failed adding password reuse prevention to pam_unix in ${PAMFILE}"
+  <% end -%>
+
+  ## Prevent blank passwords #######################################################################
+  sed -i '/.*pam_unix.so.*$/{s/ nullok//}' ${PAMFILE} || echo "PAM Snippet: Failed to remove nullok"
+
+  ## Remove unused fingerprint scanner support #####################################################
+  sed -i '/^auth\s*sufficient\s*pam_fprintd.so.*$/d' ${PAMFILE} || \
+   echo "PAM Snippet: Failed to remove unused fingerprint scanner support"
+
+  ## On RHEL 6 display last failed login ###########################################################
+  # Not required on RHEL 7 as it's already configured by default in /etc/pam.d/postlogin
+  <% if @host.operatingsystem.major.to_i == 6 -%>
+    grep -q -E "^session\s*optional\s*pam_lastlog.so.*showfailed$" ${PAMFILE}
+    if [[ $? -ne 0 ]]; then
+      echo "session     optional      pam_lastlog.so nowtmp showfailed" >> ${PAMFILE} || echo "PAM Snippet: Failed to enable display of last failed login"
+    fi
+  <% end -%>
+
+  <% if auth_ldap -%>
+    ## For systems that use local home directories e.g DMZ we use oddjobd to mount home directories
+    # We will only add the pam_oddjob_mkhomedir.so if localhome parameter exists
+    <% if @host.params['localhomes'] ? true : false -%>
+      <% if @host.operatingsystem.major.to_i == 6 -%>
+        sed -i '/.*session\s*required\s*pam_limits.so.*$/asession     optional     pam_oddjob_mkhomedir.so umask=0077' ${PAMFILE} || \
+        echo "PAM Snippet: Failed pam_oddjob_mkhomedir change in ${PAMFILE}"
+      <% else -%>
+        sed -i '/.*session\s*optional\s*pam_systemd.so.*$/asession     optional     pam_oddjob_mkhomedir.so umask=0077' ${PAMFILE} || \
+        echo "PAM Snippet: Failed pam_oddjob_mkhomedir change in ${PAMFILE}"
+      <% end -%>
+    <% end -%>
+  <% end -%>
+
+  <% if auth_ad -%>
+    ## For systems that use local home directories e.g DMZ we use oddjobd to mount home directories
+    # We will only add the pam_oddjob_mkhomedir.so if localhome parameter exists
+    <% if @host.params['localhomes'] ? true : false -%>
+      <% if @host.operatingsystem.major.to_i == 6 -%>
+        sed -i '/.*session\s*required\s*pam_limits.so.*$/asession     optional     pam_oddjob_mkhomedir.so umask=0077' ${PAMFILE} || \
+        echo "PAM Snippet: Failed pam_oddjob_mkhomedir change in ${PAMFILE}"
+      <% else -%>
+        sed -i '/.*session\s*optional\s*pam_systemd.so.*$/asession     optional     pam_oddjob_mkhomedir.so umask=0077' ${PAMFILE} || \
+        echo "PAM Snippet: Failed pam_oddjob_mkhomedir change in ${PAMFILE}"
+      <% end -%>
+    <% end -%>
+  <% end -%>
+
+done
+echo "End 'PAM hardening' in access snippet"
+<%# End Configure PAM -%>
+
+
+<%# Configure login.defs -%>
+  # Harden default values in login.defs for local user accounts (except root)
+  sed -i 's/^PASS_MAX_DAYS\s[0-9]\{0,6\}/PASS_MAX_DAYS   90/' /etc/login.defs || \
+   echo "Harden login.defs: Failed 1/4"
+  sed -i 's/^PASS_MIN_DAYS\s[0-9]\{0,1\}/PASS_MIN_DAYS   1/' /etc/login.defs || \
+   echo "Harden login.defs: Failed 2/4"
+  sed -i 's/^PASS_MIN_LEN\s[0-9]\{0,2\}/PASS_MIN_LEN    11/' /etc/login.defs || \
+   echo "Harden login.defs: Failed 3/4"
+  sed -i 's/^PASS_WARN_AGE\s[0-9]\{0,2\}/PASS_WARN_AGE   14/' /etc/login.defs || \
+   echo "Harden login.defs: Failed 4/4"
+echo "End 'Configure login.defs' in access snippet"
+<%# End Configure login.defs -%>
+

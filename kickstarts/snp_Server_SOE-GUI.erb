@@ -1,0 +1,29 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-GUI
+%>
+echo "Starting X Windows GUI configuration"
+
+<% if @host.operatingsystem.major.to_i == 7 -%>
+
+<%# Install X server and GNOME -%>
+yum groupinstall -q -y "X Window System" GNOME
+
+<%# Disable Initial Login Firstboot wizard globally -%>
+yum -y -q remove gnome-initial-setup
+
+<%# Hardening -%>
+
+
+
+
+<%# Set graphical target -%>
+systemctl set-default graphical.target
+
+
+<% else -%>
+echo "X Config not supported in this release"
+<% end -%>
+
+echo "Finished X Windows GUI configuration"
+

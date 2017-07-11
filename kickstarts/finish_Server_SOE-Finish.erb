@@ -1,0 +1,69 @@
+<%#
+kind: finish
+name: dev_Server_SOE-Finish
+oses:
+- RedHat 6
+- RedHat 7
+%>
+
+<%
+  rhel_compatible = @host.operatingsystem.family == 'Redhat' && @host.operatingsystem.name != 'Fedora'
+  os_major = @host.operatingsystem.major.to_i
+  pm_set = @host.puppetmaster.empty? ? false : true
+  puppet_enabled = pm_set || @host.params['force-puppet']
+  salt_enabled = @host.params['salt_master'] ? true : false
+%>
+
+# Logging....
+(
+<%# reset hostname %>
+hostname $(hostname -f)
+
+<%= snippet "dev_Server_SOE-subscription_manager_registration" %>
+
+<%# Generate new SSH keys %>
+<%= snippet "dev_Server_SOE-GenSSHkeys" %>
+
+<% if @host.respond_to?(:realm) && @host.otp && @host.realm && @host.realm.realm_type == "Red Hat Identity Management" -%>
+<%= snippet "dev_Server_SOE-idm_register" %>
+<% end -%>
+
+# update local time
+echo "updating system time"
+/usr/sbin/ntpdate -sub <%= @host.params['ntp-server'] || 'ntp1.core.home.gatwards.org' %>
+/usr/sbin/hwclock --systohc
+
+# update all the base packages from the updates repository
+yum -t -y -e 0 update
+
+<%# Disable IPv6 unless configured to ignore this -%>
+<%# THIS SNIPPET SHOULD BE 2ND LAST (NOT working in initial image clone ci jobs - fix later) -%>
+<%# if ipv6_disabled -%>
+  # Disable IPv6 - for both RHEL6 and 7
+  <%#= snippet "dev_Server_SOE-disable_IPv6" -%>
+<%# end -%>
+  
+<% if puppet_enabled %>
+yum -t -y -e 0 install puppet
+echo "Configuring puppet"
+cat > /etc/puppet/puppet.conf << EOF
+<%= snippet 'puppet.conf' %>
+EOF
+
+# Setup puppet to run on system reboot
+/sbin/chkconfig --level 345 puppet on
+/usr/bin/puppet agent --config /etc/puppet/puppet.conf -o --tags no_such_tag <%= @host.puppetmaster.blank? ? '' : "--server #{@host.puppetmaster}" %> --no-daemonize
+/sbin/service puppet start
+<% end -%>
+
+# Inform the build system that we are done.
+echo "Informing Satellite that we are built"
+wget -q -O /dev/null --no-check-certificate <%= foreman_url %>
+
+# Remove the postbuild script
+rm -f /root/postbuild.sh
+
+# Final reboot post-customisation
+reboot
+) 2>&1 | tee /root/install.finish.log
+exit 0

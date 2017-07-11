@@ -1,0 +1,115 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-MISC
+%>
+
+<%# General configuration applied to all managed hosts -%>
+cat >> /root/.bashrc << EOF
+
+# If not interactive, do nothing
+[ -z "\$PS1" ] && return
+
+HISTSIZE=100000
+shopt -s histappend
+export HISTTIMEFORMAT="{%F %a %T}  "
+
+# Set root prompt
+if [ \$(hostname -d | grep -c lab\.) -eq 1 ]; then
+  export PS1="\[\033[0;31m\]\u@\h\[\033[0;34m\][\w] #\[\033[0m\] "
+else
+  export PS1="\[\033[0;31m\]\u@\h\[\033[0;32m\][\w] #\[\033[0m\] "
+fi
+EOF
+
+# On RHEL 7 define anti carpal-tunnel syndrome shortcuts
+<% if @host.operatingsystem.major.to_i >= 7 -%>
+  # Use symbolic links for simplicity, especially to allow using "sudo <shortcut>" without clunky
+  # 'sudo ' aliases.
+  ln -s $(type -p systemctl) /usr/bin/sctl
+  ln -s $(type -p firewall-cmd) /usr/bin/fcmd
+<% end -%>
+
+
+<%# Create initial MOTD with links to instructions -%>
+  # Create an initial Message Of The Day file to greet new system owners.  Hopefully they will RTFM!
+  ## If appropriate this could be managed by a Satellite 6 variable in future.
+  #
+  # Temporarily adding one without colours, just to get the job done
+  cat > /etc/motd << EOL
+--------------------------------------------------------------------------------
+| NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE |
+|                                                                              |
+|  This system has been built from the Server SOE.                             |
+|  It has been hardened to meet ISM requirements for accreditation.            |
+|                                                                              |
+|  You can then remove this notice by running: "sudo rm /etc/motd"             |
+|                                                                              |
+| NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE |
+--------------------------------------------------------------------------------
+EOL
+
+
+<%# On physical servers only, install and enable Hardware Random Number Generator daemon (rngd) -%>
+# The rngd service allows the kernel to use entropy from hardware random number generators
+if [ "$(virt-what)" == "" ]; then
+  yum install -q -y rng-tools
+  <% if @host.operatingsystem.major.to_i >= 7 -%>
+    systemctl enable rngd
+  <% else -%>
+    chkconfig rngd on
+  <% end -%>
+fi
+
+
+<%# Disable the Automatic Bug Reporting Tool and associated services -%>
+for SERVICE in abrtd abrt-ccpp
+do
+  <% if @host.operatingsystem.major.to_i >= 7 -%>
+    systemctl disable $SERVICE
+  <% else -%>
+    chkconfig $SERVICE off
+  <% end -%>
+done
+
+
+<%# Disable Kdump service -%>
+# To prevent denial of service or access to sensitive memory, disable kdump.
+<% if @host.operatingsystem.major.to_i >= 7 -%>
+  systemctl disable kdump.service || echo 'Error: Failed to disable Kdump Service'
+<% else -%>
+  chkconfig kdump off || echo 'Error: Failed to disable Kdump Service'
+<% end -%>
+
+<%# Disable Kdump service end -%>
+
+
+<%# htop is an excellent monitoring tool -%>
+yum install -q -y htop
+
+# Create a good default configuration for htop
+mkdir -p /root/.config/htop
+cat > /root/.config/htop/htoprc << EOL
+# 'htop' configuration which enables IO monitoring and process highlighting.
+fields=0 48 17 18 38 39 40 2 64 46 47 49 1
+sort_key=46
+sort_direction=1
+hide_threads=0
+hide_kernel_threads=1
+hide_userland_threads=0
+shadow_other_users=0
+show_thread_names=0
+highlight_base_name=1
+highlight_megabytes=1
+highlight_threads=0
+tree_view=0
+header_margin=1
+detailed_cpu_time=1
+cpu_count_from_zero=0
+color_scheme=0
+delay=20
+left_meters=AllCPUs Memory Swap
+left_meter_modes=1 1 1
+right_meters=Hostname Tasks LoadAverage Uptime
+right_meter_modes=2 2 2 2
+EOL
+

@@ -1,0 +1,285 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-ISM
+%>
+
+<%# Snippet to enable additional hardening in order to meet ISM controls.
+Note that hardening is also integrated in other parts of the kickstart, including being enforced in
+some places with Puppet. -%>
+
+
+<%# Ensure GID 10 has no default sudo privileges -%>
+# By default RHEL 7 used to grant GID 10 full privledged access with sudo.
+# In Solaris GID 10 was "staff" and sadly many unprivileged users are still in GID 10.
+sed -i 's/^%wheel\s.*ALL=(ALL).*/# %wheel\tALL=(ALL)\t\tALL/g' /etc/sudoers
+
+
+<%# Create hardened initial sysctl.conf -%>
+cat > /etc/sysctl.conf << EOL
+## Note: This file has been created to provide a security hardened system by default.  It should
+## not be changed without justification or your system will be difficult to accredit!!
+
+# System default settings live in /usr/lib/sysctl.d/00-system.conf.
+# To override those settings, enter new settings here, or in an /etc/sysctl.d/<name>.conf file
+#
+# For more information, see sysctl.conf(5) and sysctl.d(5).
+##
+
+## Most changes are based on headings in the "CIS Red Hat Enterprise Linux 7 Benchmark" document
+
+# Enable ExecShield, which marks large parts of many programs stack not executable.
+kernel.exec-shield = 1
+
+# Use process address space and heap randomsation.
+kernel.randomize_va_space = 2
+
+# Prevent core dumps being created for set-user-ID (suid) binaries.
+# (Also note any "core" settings in /etc/security/limits.conf)
+fs.suid_dumpable = 0
+
+
+## The following settings apply ISM sysctl IPv4 modifications.
+## For more detail, see the SCAP Security Guide Project https://fedorahosted.org/scap-security-guide
+
+# Disable Kernel Parameter for IP Forwarding (or routing)
+net.ipv4.conf.all.forwarding = 0
+net.ipv4.ip_forward = 0
+
+# Disable Kernel Parameter for Sending ICMP Redirects, by Default (only required on routers)
+net.ipv4.conf.default.send_redirects = 0
+
+# Disable Kernel Parameter for Sending ICMP Redirects, for All Interfaces (only required on routers)
+net.ipv4.conf.all.send_redirects = 0
+
+# Disable Kernel Parameter for Accepting Source-Routed Packets, for All Interfaces
+net.ipv4.conf.all.accept_source_route = 0
+
+# Disable Kernel Parameter for Accepting ICMP Redirects, for All Interfaces
+net.ipv4.conf.all.accept_redirects = 0
+
+#Disable Kernel Parameter for Accepting Secure Redirects, for All Interfaces
+net.ipv4.conf.all.secure_redirects = 0
+
+# Enable Kernel Parameter to Log Martian Packets (nefarious network
+#               activity: impossible addresses and spoofed packets)
+net.ipv4.conf.all.log_martians = 1
+
+# Disable Kernel Parameter for Accepting Source-Routed Packets, By Default
+net.ipv4.conf.default.accept_source_route = 0
+
+# Disable Kernel Parameter for Accepting ICMP Redirects, By Default
+net.ipv4.conf.default.accept_redirects = 0
+
+# Disable Kernel Parameter for Accepting Secure Redirects By Default
+net.ipv4.conf.default.secure_redirects = 0
+
+# Enable Kernel Parameter to Ignore ICMP Broadcast Echo Requests
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+
+# Enable Kernel Parameter to Ignore Bogus ICMP Error Responses
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+# Enable Kernel Parameter to Use TCP Syncookies (Protect against TCP SYN flood attack)
+net.ipv4.tcp_syncookies = 1
+
+# Enable Kernel Parameter to Use Reverse Path Filtering, for All Interfaces
+net.ipv4.conf.all.rp_filter = 1
+
+# Enable Kernel Parameter to Use Reverse Path Filtering, by Default
+net.ipv4.conf.default.rp_filter = 1
+
+# IPv6 is disabled by default in this build (for security reasons).  However,
+# if you require IPv6, the following should be enabled (uncommented).
+#net.ipv6.conf.default.accept_redirects = 0
+#net.ipv6.conf.default.accept_ra = 0
+#net.ipv6.conf.default.accept_redirects = 0
+#net.ipv6.conf.default.router_solicitations = 0
+#net.ipv6.conf.default.accept_ra_rtr_pref = 0
+#net.ipv6.conf.default.accept_ra_pinfo = 0
+#net.ipv6.conf.default.accept_ra_defrtr = 0
+#net.ipv6.conf.default.autoconf = 0
+#net.ipv6.conf.default.dad_transmits = 0
+#net.ipv6.conf.default.max_addresses = 1
+
+EOL
+if [ ${?} -eq "0" ]; then
+  echo "Created hardened /etc/sysctl.conf"
+fi
+
+<% if @host.operatingsystem.major.to_i == 7 -%>
+  <%#
+  # This only works on RHEL 7 or later
+
+  kernel.exec-shield is no longer a RHEL 7 kernel tuning parameter in sysctl.
+  ExecShield is now enabled in the kernel by default.
+
+  If 'kernel.exec-shield' is included in /etc/sysctl.conf on a RHEL 7 host, an 
+  error about missing files will be seen when 'sysctl -p /etc/sysctl.conf' is run
+  %>
+
+  if (grep -q 'kernel\.exec-shield' /etc/sysctl.conf); then
+    sed -Ei "/^(#kernel\.exec-shield|kernel\.exec-shield).*/d" /etc/sysctl.conf
+  fi
+<% end -%>
+
+<%# Create hardened initial limits.conf -%>
+cat > /etc/security/limits.conf <<EOL
+## /etc/security/limits.conf
+## This file has had hardened values set by default to meet ISM requirements.
+#
+# This file sets the resource limits for the users logged in via PAM.
+# It does not affect resource limits of the system services.
+#
+# Also note that configuration files in /etc/security/limits.d directory,
+# which are read in alphabetical order, override the settings in this
+# file in case the domain is the same or more specific.
+# That means for example that setting a limit for wildcard domain here
+# can be overriden with a wildcard setting in a config file in the
+# subdirectory, but a user specific setting here can be overriden only
+# with a user specific setting in the subdirectory.
+
+# Disable Core Dumps
+*   hard    core        0
+*   soft    core        0
+# Limit concurrent logins
+*   hard    maxlogins   30
+
+EOL
+if [ ${?} -eq "0" ]; then
+  echo "Created hardened /etc/security/limits.conf"
+fi
+
+
+<%# Harden user masks in all shells and default profiles -%>
+  # dmneasb 201604: Some of this hardening may not make sense and has simply been done to meet dated
+  #                 STIG SCAP tests.  If we really want to enforce umasks, it should be done with
+  #                 pam instead!  Also I've seen problems with service umasks being changed.
+  for PFILE in /etc/bashrc /etc/csh.cshrc /etc/profile
+  do
+    sed -i 's/umask [0-9]\{3\}/umask 077/g' ${PFILE} || echo "Error: Failed setting umask in ${PFILE}."
+  done
+
+  # Ensure daemon umask is 027 by default to pass SCAP tests.
+  sed -i "s/umask [0-9]\{3\}/umask 027/g" /etc/init.d/functions
+
+  echo "End 'harden_umasks' section."
+
+<%# Create hardened initial /etc/sysconfig/prelink to disable prelinking for AIDE -%>
+  # AIDE Host-based intrustion detection software requires the pre-linking of binaries to be
+  # disabled or it can trigger false positives.
+
+if grep -q '^PRELINKING' /etc/sysconfig/prelink 2> /dev/null
+then
+    sed -i 's/PRELINKING.*/PRELINKING=no/g' /etc/sysconfig/prelink
+else
+    echo "# Pre-linking binaries should be disabled on servers to prevent problems with the 'aide' Host-based intrusion detection software." >> /etc/sysconfig/prelink
+    echo "PRELINKING=no" >> /etc/sysconfig/prelink
+fi
+
+# Disable any previous pre-linking
+if test -x /usr/sbin/prelink
+then
+    /usr/sbin/prelink -ua
+fi
+
+echo "End 'disable_prelink_for_aide' section."
+
+<%# Create "Disable Removable Media" Files /etc/modprobe.d/disable_removable_media.conf -%>
+cat > /etc/modprobe.d/disable_removable_media.conf <<EOL
+install usb-storage /bin/true
+install sr_mod /bin/true
+install cdrom /bin/true
+install floppy /bin/true
+
+EOL
+<%# Create "Disable Removable Media" Files /etc/modprobe.d/disable_removable_media.conf end -%>
+
+
+<%# Create "Disable Bluetooth" File /etc/modprobe.d/disable_bluetooth.conf -%>
+cat > /etc/modprobe.d/disable_bluetooth.conf <<EOL
+
+
+# Note: Despite appearances using "/bin/true" as the command to load a module actually
+# disables that component.  For more information, run 'man modprobe.conf' or see
+# http://access.redhat.com/solutions/18978
+
+# SSG-RHEL6 2.5.5.1.a
+# AC-17(8),
+# AC-18(a),
+# AC-18(d),
+# AC-18(3),
+# CM-7
+
+#alias net-pf-31 off
+install net-pf-31 /bin/true
+#alias bluetooth off
+install bluetooth /bin/true
+
+EOL
+<%# Create "Disable Bluetooth" File /etc/modprobe.d/disable_bluetooth.conf end -%>
+
+
+<%# Create "Disable External interfaces DMA" File /etc/modprobe.d/disable_external_interfaces_dma.conf -%>
+cat > /etc/modprobe.d/disable_external_interfaces_dma.conf <<EOL
+
+# Note: Despite appearances using "/bin/true" as the command to load a module actually
+# disables that component.  For more information, run 'man modprobe.conf' or see
+# http://access.redhat.com/solutions/18978
+
+install firewire-core /bin/true
+install firewire-net /bin/true
+install firewire-sbp2 /bin/true
+install firewire-ohci /bin/true
+install ohci1394 /bin/true
+install sbp2 /bin/true
+install dv1394 /bin/true
+install raw1394 /bin/true
+install video1394 /bin/true
+
+EOL
+<%# Create "Disable External interfaces DMA" File /etc/modprobe.d/disable_external_interfaces_dma.conf end -%>
+
+
+<%# Create "Disable Uncommon Filesystem Types" File /etc/modprobe.d/disable_uncommon_filesystem_types.conf -%>
+cat > /etc/modprobe.d/disable_uncommon_filesystem_types.conf <<EOL
+
+# SNAC-RHEL6 2.2.2.k CM-7
+# SNAC-RHEL6 2.2.2.n CM-7
+# SNAC-RHEL6 2.2.2.l CM-7
+# SNAC-RHEL6 2.2.2.j CM-7
+# SNAC-RHEL6 2.2.2.i CM-7
+# SNAC-RHEL6 2.2.2.h CM-7
+# SNAC-RHEL6 2.2.2.m CM-7
+
+#Ensure that "install <filesystem-type> /bin/true" or
+#equivalent exists in /etc/modprobe.d/ for
+install cramfs /bin/true
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install squashfs /bin/true
+install udf /bin/true
+
+EOL
+<%# Create "Disable Uncommon Filesystem Types" File /etc/modprobe.d/disable_uncommon_filesystem_types.conf end -%>
+
+<%# Create "Disable Uncommon Protocol Types" File /etc/modprobe.d/disable_uncommon_protocol_types.conf -%>
+cat > /etc/modprobe.d/disable_uncommon_protocol_types.conf <<EOL
+
+install dccp /bin/true
+install dccp_ipv4 /bin/true
+install dccp_ipv6 /bin/true
+install sctp /bin/true
+install rds /bin/true
+install tipc /bin/true
+install ieee1394 /bin/true
+
+EOL
+<%# Create "Disable Uncommon Protocol Types" File /etc/modprobe.d/disable_uncommon_protocol_types.conf end -%>
+
+
+<%# Install auditd package -%>
+yum install -y -q auditd
+<%# Install auditd package end -%>
+

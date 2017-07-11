@@ -1,0 +1,45 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-LDAP
+%>
+
+<%# Snippet to enable posix LDAP -%>
+cat > /root/CA.pem << EOL
+-----BEGIN CERTIFICATE-----
+-----END CERTIFICATE-----
+EOL
+
+# Install required additional packages
+yum -q -y install sssd 
+
+# Set the authentication params - use LDAP via SSSD
+authconfig --passalgo=sha512 --enableldap --enableldapauth --enablesssd --enablesssdauth \
+--ldapserver=ldaps://ldap.home.gatwards.org --ldapbasedb=dc=home,dc=gatwards,dc=org \
+--ldaploadcacert=file:///root/CA.pem \
+--updateall
+
+# Enable DNS discovery of LDAP servers
+sed -i 's/ldap_uri\s*=\s*ldaps.*/dns_discovery_domain \= home.gatwards.org/' /etc/sssd/sssd.conf || \
+echo "Error: Failed to replace ldap_uri with dns_discovery_domain"
+
+# For DNS discovery and autofs we need to explicitly define the schema
+sed -i '/dns_discovery_domain/aldapschema = rfc2307bis' /etc/sssd/sssd.conf || \
+echo "Error: Failed to add ldap_schema as dns_discovery_domain does not exist"
+
+# It appears that when using dns_discovery in nsswitch for automount "sss" needs to be before "files" to work
+sed -i 's/^automount:.*/automount:   sss files/' /etc/nsswitch.conf || \
+echo "Error: Failed to edit automount entry in nsswitch.conf"
+
+# Remove URI reference from /etc/openldap/ldap.conf for autofs with sss
+sed -i '/^URI/d' /etc/openldap/ldap.conf || \
+echo "Error: Failed to delete URI reference in ldap.conf"
+
+# RHEL 6 seems to inject krb5_realm and krb5_server entries into sssd.conf which causes automounts to fail
+<% if @host.operatingsystem.major.to_i == 6 -%>
+sed -i '/^krb5_realm/d' /etc/sssd/sssd.conf || \
+echo "Error: Failed to remove krb5_realm entry"
+
+sed -i '/^krb5_server/d' /etc/sssd/sssd.conf || \
+echo "Error: Failed to remove krb5_server entry"
+<% end -%>
+

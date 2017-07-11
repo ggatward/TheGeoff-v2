@@ -1,0 +1,59 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-GenSSHkeys
+%>
+
+<%# Snippet to enable additional hardening in order to meet ISM controls.
+Note that hardening is also integrated in other parts of the kickstart, including being enforced in
+some places with Puppet. -%>
+
+<%# Create default 384 bit ECDSA Host keys -%>
+ECDSA_KEY="/etc/ssh/ssh_host_ecdsa_key"
+
+<% if @host.operatingsystem.major.to_i == 6 -%>
+  # Create ECDSA host keys as RHEL 6 does not do so by default.
+
+  ## 2015 ISM:
+  ## Control: 0994; Revision: 4; Updated: Sep-12; Applicability: UD, P; Compliance: should; Authority: AA
+  ## Agencies should use ECDH and ECDSA in preference to DH and DSA.
+
+  echo -n $"Generating SSH2 ECDSA host key: "
+  if [ ! -f ${ECDSA_KEY} ]
+  then
+      ssh-keygen -q -t ecdsa -b 384 -f ${ECDSA_KEY} -C '' -N '' || \
+       echo "Error: Problem creating ECDSA key. Check ISM Snippet."
+      chmod 600 ${ECDSA_KEY}
+      chmod 644 ${ECDSA_KEY}.pub
+      if [ -x /sbin/restorecon ]
+      then
+          # Add file contexts for the ECDSA keys as RHEL 6 doesn't include one by default
+          semanage fcontext -a -s system_u -t sshd_key_t /etc/ssh/ssh_host.*_key
+          semanage fcontext -a -s system_u -t sshd_key_t /etc/ssh/ssh_host.*_key\.pub
+          restorecon ${ECDSA_KEY}{,.pub}
+      fi
+      echo "Generation succeeded"
+  else
+      # If you're reading this, perhaps the latest release of RHEL 6 generates ECDSA keys now!
+      echo "ECDH key generation failed.  Check snippet 'dev_Server_SOE-ISM'."
+  fi
+<% else -%>
+  # Remove weak default ECDSA host keys in RHEL 7 and create new 384 bit keys
+  rm -f ${ECDSA_KEY} ${ECDSA_KEY}.pub
+  ssh-keygen -q -t ecdsa -b 384 -f ${ECDSA_KEY} -C '' -N '' || \
+   echo "Error: Problem creating ECDSA host key. Check ISM Snippet."
+<% end -%>
+echo "Created 384 bit ECDSA Host keys"
+<%# End create default 384 bit ECDSA Host keys -%>
+
+<%# Create default 3072 bit RSA Host keys -%>
+RSA_KEY="/etc/ssh/ssh_host_rsa_key"
+
+# Remove weak default 2048-bit RSA host keys in RHEL 6 and 7.  Replace with 3072 bit as required by
+# the ISM in Control 1231
+rm -f ${RSA_KEY} ${RSA_KEY}.pub
+ssh-keygen -q -t rsa -b 3072 -f ${RSA_KEY} -C '' -N '' || \
+ echo "Error: Problem creating RSA host key. Check ISM Snippet."
+echo "Created 3072 bit RSA Host keys"
+<%# End create default 3072 bit RSA Host keys -%>
+
+

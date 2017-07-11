@@ -1,0 +1,39 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-autofs
+%>
+
+<%# Snippet to enable autofs for home directories if required.
+Relies on the localhomes host parameter.
+If localhomes parameter exists then only local directories are used, oddjobd is used to create local directories for LDAP users.
+If localhomes does not exist then autofs is enabled and nfs home directories are used.
+%>
+
+<% localhomes = @host.params['localhomes'] ? true : false
+   os_major = @host.operatingsystem.major.to_i
+%>
+
+<% if localhomes -%>
+  # Install required additional packages
+  yum -q -y install oddjob oddjob-mkhomedir
+  <% if os_major <= 6 -%>
+  chkconfig oddjobd on
+  <% else -%>
+  systemctl enable oddjobd
+  <% end -%>
+<% else -%>
+  # Install required additional packages
+  yum -q -y install autofs nfs-utils
+  # Setup /home using LDAP
+  echo "/home  ldap:automountMapName=auto.home,dc=home,dc=gatwards,dc=org" > /etc/auto.master
+  <% if os_major <= 6 -%>
+  chkconfig autofs on
+  <% else -%>
+  systemctl enable autofs
+  <% end -%>
+<% end -%>
+
+# Enable use_nfs_home_dirs SELinux boolean
+/usr/sbin/setsebool -P use_nfs_home_dirs 1
+
+

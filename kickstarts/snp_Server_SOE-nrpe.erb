@@ -1,0 +1,50 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-nrpe
+%>
+
+echo "Start nagios nrpe install"
+
+<%# Install and configure nagios packages -%>
+yum install -q -y nagios-plugin* nrpe
+
+# Add correct nagios server to config file
+/bin/sed -i 's/^allowed_hosts=.*/allowed_hosts=172.22.1.13/g' /etc/nagios/nrpe.cfg
+
+# Allow script execution 
+/bin/sed -i 's/^dont_blame_nrpe=.*/dont_blame_nrpe=1/g' /etc/nagios/nrpe.cfg
+
+# Create firewall rules for nrpe
+<% if @host.operatingsystem.major.to_i >= 7 -%>
+  #Allow NRPE inbound
+  cat > /usr/lib/firewalld/services/nrpe.xml << EOL
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>nrpe</short>
+  <description>Nagios NRPE agent ports required for communications with the Nagios server.</description>
+  <port protocol="tcp" port="5666"/>
+</service>
+EOL
+  #Adding netbackup service
+  firewall-offline-cmd --add-service nrpe || echo "failed to add nrpe service"
+<% else -%>
+  # On RHEL 6 use iptables
+
+  # Allow NRPE inbound from any input IP
+  echo "-A INPUT -m state --state NEW -m tcp -p tcp --dport 5666 -j ACCEPT" >> /etc/sysconfig/iptables || echo "failed to add nrpe service"
+<% end -%>
+
+#Change permissions and update selinux user for logrotate file to same as other logrotate.d files
+#chmod 0644 /etc/logrotate.d/messages
+#chcon -u system_u -t etc_t /etc/logrotate.d/messages
+
+# Enable the service
+<% if @host.operatingsystem.major.to_i >= 7 -%>
+  systemctl enable nrpe
+<% else -%>
+  chkconfig nrpe on
+<% end -%>
+
+echo "Finish nagios install"
+<%# End Install and configure nagios nrpe package -%>
+

@@ -1,0 +1,17 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-firewall
+%>
+
+<%# configure additional firewall -%>
+<% if @host.operatingsystem.major.to_i >=7 -%>
+  # Prevent iptables or ebtables from being started accidentally
+  systemctl mask iptables ebtables
+
+  # remove default rule for dhcpv6-client
+  firewall-offline-cmd --remove-service dhcpv6-client || echo "failed to remove dhcpv6-client service"
+
+  echo "End firewall snippet"
+<% end %>
+<%# End configure and disable firewall -%>
+

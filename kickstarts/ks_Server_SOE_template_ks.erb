@@ -1,0 +1,206 @@
+<%#
+kind: provision
+name: dev_Server_SOE_template_ks
+oses:
+- Red Hat Enterprise Linux 6
+- Red Hat Enterprise Linux 7
+%>
+<%
+  rhel_compatible = @host.operatingsystem.family == 'Redhat' && @host.operatingsystem.name != 'Fedora'
+  os_major = @host.operatingsystem.major.to_i
+  # safemode renderer does not support unary negation
+  pm_set = @host.puppetmaster.empty? ? false : true
+  puppet_enabled = pm_set || @host.params['force-puppet']
+  ipv6_disabled = @host.params['ipv6_disabled'] ? true : false
+  auth_ldap = @host.params['auth_ldap'] ? true : false
+  auth_ad = @host.params['auth_ad'] ? true : false
+  enable_gui = @host.params['enable_gui'] ? true : false  
+  section_end = (rhel_compatible && os_major <= 5) ? '' : '%end'
+%>
+install
+<%= @mediapath %>
+lang en_US.UTF-8
+selinux --enforcing
+keyboard us
+skipx
+
+<% subnet = @host.subnet -%>
+<% if subnet.respond_to?(:dhcp_boot_mode?) -%>
+<% dhcp = subnet.dhcp_boot_mode? && !@static -%>
+<% else -%>
+<% dhcp = !@static -%>
+<% end -%>
+
+network --bootproto <%= dhcp ? 'dhcp' : "static --ip=#{@host.ip} --netmask=#{subnet.mask} --gateway=#{subnet.gateway} --nameserver=#{[subnet.dns_primary, subnet.dns_secondary].select(&:present?).join(',')}" %> --hostname <%= @host %><%= os_major >= 6 ? " --device=#{@host.mac}" : '' -%>
+
+rootpw --iscrypted <%= root_pass %>
+firewall --<%= os_major >= 6 ? 'service=' : '' %>ssh
+authconfig --useshadow --passalgo=sha512 --kickstart
+timezone --utc <%= @host.params['time-zone'] || 'UTC' %>
+
+bootloader --location=mbr --append="nofb quiet splash=quiet" <%= grub_pass %>
+
+# Setup disk partitioning
+<% if @dynamic -%>
+%include /tmp/diskpart.cfg
+<% else -%>
+<%= @host.diskLayout %>
+<% end -%>
+
+text
+reboot
+
+%packages --ignoremissing
+aide
+bash-completion
+dhclient
+mlocate
+ntpdate
+policycoreutils-python
+rsync
+screen
+tree
+vim
+wget
+yum
+<% if os_major <= 6 -%>
+ntp
+restorecond
+<% else -%>
+chrony
+policycoreutils-restorecond
+<% end -%>
+@Core
+<%= section_end -%>
+
+<% if @dynamic -%>
+%pre
+<%= @host.diskLayout %>
+<%= section_end -%>
+<% end -%>
+
+%post --nochroot
+exec < /dev/tty3 > /dev/tty3
+#changing to VT 3 so that we can see whats going on....
+/usr/bin/chvt 3
+(
+cp -va /etc/resolv.conf /mnt/sysimage/etc/resolv.conf
+/usr/bin/chvt 1
+) 2>&1 | tee /mnt/sysimage/root/install.postnochroot.log
+<%= section_end -%>
+
+
+%post
+logger "Starting anaconda <%= @host %> postinstall"
+exec < /dev/tty3 > /dev/tty3
+#changing to VT 3 so that we can see whats going on....
+/usr/bin/chvt 3
+(
+<% if subnet.respond_to?(:dhcp_boot_mode?) -%>
+<%= snippet 'kickstart_networking_setup' %>
+<% end -%>
+
+#update local time
+echo "updating system time"
+ntpdate -sub <%= @host.params['ntp-server'] || 'ntp1.core.home.gatwards.org' %>
+hwclock --systohc
+
+<%= snippet "dev_Server_SOE-subscription_manager_registration" %>
+
+# update all the base packages from the updates repository
+yum -t -y -e 0 update
+
+#########################################
+
+yum -y install open-vm-tools
+cat << EOF >> /etc/rc.d/rc.local
+# Run post-deployment script if it exists
+if [ -x /root/postbuild.sh ]; then
+  /root/postbuild.sh
+fi
+EOF
+chmod 755 /etc/rc.d/rc.local
+
+cat << EOF > /root/postbuild.sh
+#!/bin/bash
+if [ \$(hostname -f) != "buildbot3.lab.home.gatwards.org" ] && [ \$(hostname -f) != "buildbot4.lab.home.gatwards.org" ]; then
+  # Attempt to get the finish script from each capsule until we have a winner.
+  for i in sat6cap1.lab.home.gatwards.org sat62.core.home.gatwards.org; do
+    wget -O /root/finish.sh https://\${i}/unattended/finish
+    if [ \$? -eq 0 ]; then
+      echo "Downloaded finish script from $i"
+      break
+    fi
+  done
+fi
+chmod 755 /root/finish.sh && /root/finish.sh
+EOF
+
+chmod 755 /root/postbuild.sh
+
+############################################
+
+
+<%# This snippet is to be replaced by puppet modules -%>
+# Apply Generic config
+<%= snippet "dev_Server_SOE-MISC" %>
+
+<%# Apply add Root CA -%>
+<%= snippet "dev_Server_SOE-trust_root_cert" %>
+
+<%# Apply static ISM hardening - can be overridden by system owners if needed -%>
+<%= snippet "dev_Server_SOE-ISM" %>
+
+<%# Apply default hardened SSH server configuration -%>
+cat > /etc/ssh/sshd_config << EOL
+<%= snippet 'dev_Server_SOE-sshd' %>
+EOL
+<%# Apply default hardened SSH client configuration -%>
+cat > /etc/ssh/ssh_config << EOL
+<%= snippet 'dev_Server_SOE-ssh_client' %>
+EOL
+
+<%# Remove unwanted users-%>
+<%= snippet 'dev_Server_SOE-user-del' %>
+
+<%# Install yum update schedule -%>
+<%= snippet "dev_Server_SOE-yum_update_schedule" %>
+
+<%# Disable postfix -%>
+<%= snippet "dev_Server_SOE-postfix" %>
+
+<%# Disable firewall -%>
+<%= snippet "dev_Server_SOE-firewall" %>
+
+<%# Disable IPv6 unless configured to ignore this -%>
+<%# THIS SNIPPET SHOULD BE 2ND LAST -%>
+<% if ipv6_disabled %>
+  # Disable IPv6 - for both RHEL6 and 7
+  <%= snippet "dev_Server_SOE-disable_IPv6" %>
+<% end -%>
+
+<%# Apply add /etc/soe-release file -%>
+<%# THIS SHOULD BE LAST -%>
+<%= snippet "dev_Server_SOE-soe_release_file" %>
+
+<%# After disabling kernel modules such as for Removable Media,Bluetooth, uncommon filesystems and protocols a new initramfs image must be created -%>
+echo "Starting : Rebuild initramfs"
+KERNEL_VERSION=$(rpm -q kernel --qf '%{version}-%{release}.%{arch}\n' | tail -n 1)
+echo $KERNEL_VERSION
+dracut -f /boot/initramfs-$KERNEL_VERSION.img $KERNEL_VERSION
+echo "Finished  : Rebuild initramfs"
+<%# After disabling kernel modules such as for Removable Media,Bluetooth, uncommon filesystems and protocols a new initramfs image must be created end -%>
+
+sync
+
+<% if @provisioning_type == nil || @provisioning_type == 'host' -%>
+
+# Inform the build system that we are done.
+echo "Informing Satellite that we are built"
+wget -q -O /dev/null --no-check-certificate <%= foreman_url %>
+<% end -%>
+) 2>&1 | tee /root/install.post.log
+exit 0
+
+<%= section_end -%>
+

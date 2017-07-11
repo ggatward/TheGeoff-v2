@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+
+  tasks:
+  - name: Poweroff VM
+    vsphere_guest:
+      vcenter_hostname: "{{ vmwhost }}"
+      username: "{{ vmwuser }}"
+      password: "{{ vmwpass }}"
+      validate_certs: no
+      guest: "{{ host }}"
+      state: powered_off
+
+  - name: Poweron VM
+    vsphere_guest:
+      vcenter_hostname: "{{ vmwhost }}"
+      username: "{{ vmwuser }}"
+      password: "{{ vmwpass }}"
+      validate_certs: no
+      guest: "{{ host }}"
+      state: powered_on
+

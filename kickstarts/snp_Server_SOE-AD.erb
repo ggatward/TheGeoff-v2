@@ -1,0 +1,86 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-AD
+%>
+
+<%# 
+AD-specific snippet to enable Active Directory authentication and autofs home dirs
+If the 'localhomes' parameter is set for host or hostgroup, NFS home directories will not be configured.
+%>
+
+<% localhomes = @host.params['localhomes'] ? true : false
+   os_major = @host.operatingsystem.major.to_i
+%>
+
+
+# Install required packages
+yum -y install sssd sssd-ad adcli realmd autofs nfs-utils samba-common
+
+# This *must* come before realm command to be effective
+cat > /etc/realmd.conf << EOL
+[users]
+ default-home = /home/%U
+ default-shell = /bin/bash
+
+# Don't allow AD to control access to this system - we're using pam_access
+[ad.home.gatwards.org]
+ manage-system = no
+ # We must disable automatic id mapping or AD uids are used and users cannot mount
+ # home directories!
+ automatic-id-mapping = no
+EOL
+
+# Join the AD using host group parameters
+echo '<%= @host.params['ad_join_password']%>' | realm join -U <%= @host.params['ad_join_account']%> -v AD.HOME.GATWARDS.ORG --unattended --install=/ || \
+ echo -e "Error $? Unable to join Active Directory.  See dev_Server_SOE-AD snippet.\n"
+
+
+# Allow any AD user to login as we control access already through pam_access (/etc/security/access.conf) 
+# IF this step fails *nobody* can log in remotely - use the console!
+
+# If run in kickstart, even after a sleep, this command fails complaining no realm is  available.
+# The only option is to delay configuration until after a reboot
+#sleep 60
+#realm permit --all --unattended || echo -e "Error $? Unable to permit local logins by all.  See dev_Server_SOE-AD snippet.\n"
+echo "realm permit --all --unattended || echo 'Error $? Unable to permit local logins by all.  See dev_Server_SOE-AD snippet.' > /tmp/kickstart.ad.error " | \
+at now + 4 minutes > /dev/null 2>&1 \ || echo "Error: Failed to schedule granting AD login permissions.  See dev_Server_SOE-AD snippet."
+
+# Update sssd configuration for AD
+sed -i '/services = nss, pam/a default_domain_suffix = ad.home.gatwards.org' /etc/sssd/sssd.conf
+##TESTING!!
+##sed -i 's/fallback_homedir.*/fallback_homedir = \/home\/%d\/%u/' /etc/sssd/sssd.conf
+sed -i 's/fallback_homedir.*/fallback_homedir = \/home\/%u/' /etc/sssd/sssd.conf
+#sed -i 's/fallback_homedir.*/fallback_homedir = \/tmp/' /etc/sssd/sssd.conf
+sed -i '/default_domain_suffix = ad.home.gatwards.org/a full_name_format = %1$s' /etc/sssd/sssd.conf
+
+<% if localhomes -%>
+  echo "Using local home directories as 'localhomes' parameter is set"
+<% else -%>
+  echo "Configuring NFS home directories"
+  # Add autofs to sssd configuration for the domain
+  sed -i  '/^services = nss.*/ s/$/, autofs/' /etc/sssd/sssd.conf
+
+  # The realm command configures local home directories with oddjob...
+  # We need to undo that!
+  authconfig --updateall --disablemkhomedir --nostart || echo "Error $? Failed to disable local home directories."
+
+  # Add auto.home reference to autofs master configuration
+  sed -i '$'"i /home  /etc/auto.home" /etc/auto.master
+  
+  # Configure NFS home directories for fileserver1
+  #echo '*  -soft,intr,vers=3,tcp  fileserver1:/export/home/&' > /etc/auto.home
+  echo '*  -soft,intr,vers=3,tcp  fileserver1.home.gatwards.org:/export/homes/&' > /etc/auto.home
+
+  # Enable autofs service
+  <% if os_major = 6 -%>
+    /sbin/chkconfig autofs on
+  <% else -%>
+    systemctl enable autofs
+  <% end -%>
+
+  # Enable SELinux boolean to allow NFS home directories
+  /usr/sbin/setsebool -P use_nfs_home_dirs 1 || echo "Error $? Failed to enable use_nfs_home_dirs boolean."
+<% end -%>
+
+echo "Finished dev_Server_SOE-AD snippet."
+

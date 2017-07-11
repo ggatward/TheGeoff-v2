@@ -1,0 +1,174 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-disable_IPv6
+%>
+
+<%
+  os_major = @host.operatingsystem.major.to_i
+%>
+
+
+echo -n "Disabling IPv6: "
+
+<% if os_major == 6 -%>
+  <%#
+  ## This will only work on RHEL6 or earlier
+  # Based on https://access.redhat.com/solutions/8709
+  %>
+
+  <%# Determine the external facing interface of this host - assumes one interface only %>
+  ETH_INF=`ls -1 /sys/class/net | grep -v lo`
+
+  cat >> /etc/sysctl.conf << EOL
+##
+#  Ensure that the IPv6 kernel modules are included during OS instance build.
+#  Where possible, the use of IPv6 will be disabled in configuration of OS
+#  applications/utilities.
+#
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.${ETH_INF}.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+EOL
+
+  <%# Activate kernel variables that were set above %>
+  sysctl -p /etc/sysctl.conf
+
+  <%# Also clean up /etc/sysconfig/network even though it doesn't prevent IPv6 being disabled %>
+  cat >> /etc/sysconfig/network << EOL
+##
+# 2015 ISM, Control 0521
+# Dual Stack network devices and ICT equipment that support IPv6 must disable
+# the functionality unless it is being used
+#
+NOZEROCONF=yes
+IPV6INIT=no
+IPV6_AUTOCONF=no
+EOL
+
+  <%# Clean up other things %>
+  <%# 1. Comment IPv6 loopback or IPv6 addresses from /etc/hosts  %>
+  sed --in-place=.disableipv6 's/^[[:space:]]*::/#::/' /etc/hosts
+
+
+  <%# 2. Disable ip6tables %>
+  chkconfig ip6tables off
+
+  <%# 3. Disable NFS services listening on IPv6 sockets %>
+  sed --in-place=.disableipv6 's/ v     inet6 / -     inet6 /g' /etc/netconfig
+
+  <%# 4. Explicitly configure sshd to listen on IPv4 sockets only, else SSH %>
+  <%# XForwarding will break (in case it's used) %>
+  cat > /tmp/sshd_content << EOL
+
+# 2015 ISM, Control 0521
+# Dual Stack network devices and ICT equipment that support IPv6 must disable
+# the functionality unless it is being used
+AddressFamily inet
+EOL
+
+  cp -p /etc/ssh/sshd_config /etc/ssh/sshd_config.disableipv6
+  if (grep -q 'AddressFamily' /etc/ssh/sshd_config)
+  then
+      sed -Ei "/^(#AddressFamily|AddressFamily).*/d" /etc/ssh/sshd_config
+  fi
+  cat /tmp/sshd_content >> /etc/ssh/sshd_config
+  rm /tmp/sshd_content
+
+  <%# 5. Explicitly configure postfix to use enable IPv4 only (in case it's used) %>
+  sed --in-place=.disableipv6 's/inet_protocols = all/inet_protocols = ipv4/g' /etc/postfix/main.cf
+<% end %>
+
+<% if os_major == 7 -%>
+  <%# Determine the external facing interface of this host - assumes one interface only %>
+  ETH_INF=`ls -1 /sys/class/net | grep -v lo`
+
+  cat >> /etc/sysctl.conf << EOL
+##
+#  Ensure that the IPv6 kernel modules are included during OS instance build.
+#  Where possible, the use of IPv6 will be disabled in configuration of OS
+#  applications/utilities.
+#
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.${ETH_INF}.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+EOL
+
+  <%# Activate kernel variables that were set above %>
+  sysctl -p /etc/sysctl.conf || echo "Error activating kernel parameters to disable IPv6 (part2)"
+
+  <%# B. Clean up /etc/sysconfig/network even though it doesn't prevent IPv6 being disabled %>
+  cat > /etc/sysconfig/network << EOL
+##
+# 2015 ISM, Control 0521
+# Dual Stack network devices and ICT equipment that support IPv6 must disable
+# the functionality unless it is being used
+#
+NETWORKING=yes
+NOZEROCONF=yes
+IPV6INIT=no
+IPV6_AUTOCONF=no
+EOL
+
+  <%# Clean up other things %>
+  <%# 1. Comment IPv6 loopback or IPv6 addresses from /etc/hosts %>
+  sed --in-place=.disableipv6 's/^[[:space:]]*::/#::/' /etc/hosts
+
+
+  <%# 2. Disable ip6tables %>
+  systemctl disable ip6tables
+
+  <%# 3. Disable NFS services listening on IPv6 sockets %>
+  sed --in-place=.disableipv6 's/ v     inet6 / -     inet6 /g' /etc/netconfig
+
+  <%# 4. Explicitly configure sshd to listen on IPv4 sockets only, else SSH %>
+  <%# XForwarding will break (in case it's used) %>
+  cat > /tmp/sshd_content << EOL
+
+# 2015 ISM, Control 0521
+# Dual Stack network devices and ICT equipment that support IPv6 must disable
+# the functionality unless it is being used
+AddressFamily inet
+EOL
+
+  cp -p /etc/ssh/sshd_config /etc/ssh/sshd_config.disableipv6
+  if (grep -q 'AddressFamily' /etc/ssh/sshd_config)
+  then
+      sed -Ei "/^(#AddressFamily|AddressFamily).*/d" /etc/ssh/sshd_config
+  fi
+  cat /tmp/sshd_content >> /etc/ssh/sshd_config
+  rm /tmp/sshd_content
+
+  <%# 5. Explicitly configure postfix to use enable IPv4 only (in case it's used) %>
+  sed --in-place=.disableipv6 's/inet_protocols = all/inet_protocols = ipv4/g' /etc/postfix/main.cf
+
+  <%# 6. Explicilty configure chronyd to use IPv4 only %>
+  if (! grep -q 'OPTIONS' /etc/sysconfig/chronyd 2>/dev/null)
+  then
+      <%# Note: the next part cannot be indented else it affects the file created. %>
+      cat >> /etc/sysconfig/chronyd << EOL
+#
+#  chronyd listens on both IPv4 and IPv6 sockets unless explicitly configured
+#  to start with a '-4' option for IPv4 only.
+OPTIONS="-4"
+EOL
+
+  fi
+
+  <%# 7. Explicilty configure nscd to use IPv4 only %>
+  if (! grep -q 'OPTIONS' /etc/sysconfig/nscd 2>/dev/null)
+  then
+      <%# Note: the next part cannot be indented else it affects the file created. %>
+      cat >> /etc/sysconfig/nscd << EOL
+## IPv6 is disabled by default to meet ISM control 0521.
+#  nscd caches both IPv4 and IPv6 sockets unless explicitly configured
+#  to start with a '-4' option for IPv4 only.
+OPTIONS="-4"
+EOL
+
+  fi
+<% end %>
+
+echo "Disabling IPv6 succeeded"
+

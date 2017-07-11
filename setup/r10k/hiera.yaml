@@ -1,0 +1,28 @@
+---
+:backends:
+  - yaml
+
+:yaml:
+  :datadir: "/etc/puppet/environments/%{environment}/hiera"
+
+:hierarchy:
+  - test
+  - "hosts/%{fqdn}"
+  - "hosts/%{role}"
+  - "systems/%{system}-%{site}-%{tier}"
+  - "systems/%{system}-%{tier}"
+  - "systems/%{system}"
+  - "systems/%{system_owner}"
+  - "networks/%{network}"
+  - "databases/%{database}"
+  - "databases/%{database_owner}"
+  - "domains/%{domain}"
+  - "os/%{operatingsystem}/%{operatingsystemrelease}"
+  - "os/%{operatingsystem}"
+  - "owner/%{os_owner}"
+  - "owner/%{security_owner}"
+  - "owner/%{vendor_owner}"
+  - common
+
+:merge_behavior: deeper
+

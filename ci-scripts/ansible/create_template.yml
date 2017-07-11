@@ -1,0 +1,48 @@
+---
+- hosts: localhost
+
+  tasks:
+### Convert to use uuid instead of needing folder name
+###  Using vSphere jenkins plugin for now...
+#  - name: Remove existing snapshots
+#    vmware_guest_snapshot:
+#      hostname: vcenter.lab.home.gatwards.org
+#      username: svc-jenkins@ad.home.gatwards.org
+#      password: ******
+#      validate_certs: no
+#      datacenter: Home
+#      folder: '/Lab VMs'
+#      name: "{{ host }}"
+#      state: remove_all
+#    delegate_to: localhost
+
+### Convert to use uuid instead of needing folder name
+###  Using vSphere jenkins plugin for now...
+#  - name: Create snapshot
+#    vmware_guest_snapshot:
+#      hostname: vcenter.lab.home.gatwards.org
+#      username: svc-jenkins@ad.home.gatwards.org
+#      password: ******
+#      validate_certs: no
+#      datacenter: Home
+#      folder: '/Lab VMs'
+#      name: "{{ host }}"
+#      snapshot_name: snap1
+#      state: present
+
+  - name: Clone VM as template
+    vmware_guest:
+      hostname: "{{ vmwhost }}"
+      username: "{{ vmwuser }}"
+      password: "{{ vmwpass }}"
+      validate_certs: no
+      datacenter: "{{ vmwdc }}"
+      cluster: "{{ vmwcluster }}"
+      folder: "{{ vmwfolder }}"
+#      folder: '/VM Templates'
+      template: "{{ host }}"
+      name: "{{ template }}"
+      is_template: yes
+    delegate_to: localhost
+
+

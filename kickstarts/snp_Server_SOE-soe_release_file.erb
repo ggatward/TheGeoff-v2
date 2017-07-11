@@ -1,0 +1,23 @@
+<%#
+kind: snippet
+name: dev_Server_SOE-soe_release_file
+%>
+
+<%# Create /etc/soe-release file -%>
+
+## In order to identify which version of SOE a system was created from, we
+## create an /etc/soe-release file.
+
+#Time that this system was built.
+BUILDTIME=$(/bin/date)
+
+# Where SOEVERSION will be the git tag of the promoted production SOE 
+
+echo "SOE SOEVERSION" > /etc/soe-release
+echo "Built on $BUILDTIME from RHEL <%= @host.operatingsystem.major %>.<%= @host.operatingsystem.minor %>" >> /etc/soe-release
+echo "Puppet Environment: <%= @host.environment %>" >> /etc/soe-release
+echo "Host Group: <%= @host.hostgroup %>" >> /etc/soe-release
+
+echo "End 'create_soe_release_file' snippet."
+<%# End Create /etc/soe-release file -%>
+
