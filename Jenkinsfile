@@ -188,7 +188,7 @@ lock(resource: 'Deployment', inversePrecedence: true){
 
   // If this is the MASTER branch and we have set buildProd to 'false' we need to cleanly exit here.
   if (BRANCH_NAME == 'master') {
-    if (buildProd == 'false') {
+    if (buildProd == false) {
       echo "Production build/test not requested"
       return
     }
