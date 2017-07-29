@@ -1,0 +1,72 @@
+---
+# Define the base (major) version number of the build
+soeMajorVer: 0
+
+git:
+  # URL of the Git repository (ssh format)
+  gitUrl: git@github.com:something/RHEL-Builder.git
+  # Name of the master branch of this project. Used for build logic and promotion merge behaviour.
+  masterBranch: master
+
+# Definitions for our Satellite environment
+satellite:
+  sat_host: sat62.example.org
+  sat_org: MyOrg           # Satellite Organisation
+  sat_user: svc-jenkins    # User that will be running commands on Satellite (CLI/API)
+  r10k_user: svc-r10k      # User that will be running r10k commands via ssh on Satellite
+  puppet_locs: Home        # Comma seperated list of locations that require the puppet environment.
+
+# Definitions for our VMware environment
+# Host is required. If not using VMware set a dummy hostname.
+# DataCenter, Cluster and Template Folder all required for Tamplating and Image provisioning
+VMware:
+  vmwHost: vcenter.example.org
+  vmwDC: Home
+  vmwCluster: Lab
+  vmwTemplFolder: /VM Templates
+
+
+# Do we want email notifictions of build results (true|false)?
+notifyEnabled: true
+
+# Do we want/need to build and test hosts? (false here results in NO builds at all!)
+buildHosts: false
+
+
+# ___ KICKSTART ___
+# Are we including full kickstart hosts in the build (true/false)?
+buildKS: true
+
+# Hosts that will be kickstarted (Full build via KS)
+# 'reboot' defines what controls reboot of our VMs: [sat6|vmware|manual]
+ksHosts:
+  - host1:
+    name: buildhost1.example.org
+    reboot: sat6
+  - host2:
+    name: buildhost2.example.org
+    reboot: sat6
+
+
+# ___ TEMPLATES ___
+# Are we including VMware template images in the build? (true/false)
+buildTemplates: false
+
+# Hosts that will be kickstarted to become the Gold Templates
+# 'reboot' defines what controls reboot of our VMs: [sat6|vmware|manual]
+# 'template' defines the name of the Gold Template to create
+templKsHosts:
+  - host1:
+    name: buildhost3.example.org
+    reboot: vmware
+    template: RHEL7_Server
+  - host2:
+    name: buildhost4.example.org
+    reboot: sat6
+    template: RHEL6_Server
+
+# Hosts that will be deployed for testing from the Gold Templates
+templHosts:
+  - buildhost5.example.org
+  - buildhost6.example.org
+
