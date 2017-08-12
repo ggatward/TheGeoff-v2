@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Jenkins SOE : Building the SOE</title>
+        <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+
+    <body class="theme-default aui-theme-default">
+        <div id="page">
+            <div id="main" class="aui-page-panel">
+                <div id="main-header">
+                    <div id="breadcrumb-section">
+                        <ol id="breadcrumbs">
+                            <li class="first">
+                                <span><a href="index.html">Jenkins SOE</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Jenkins-Home_56197143.html">Jenkins Home</a></span>
+                            </li>
+                                                </ol>
+                    </div>
+                    <h1 id="title-heading" class="pagetitle">
+                                                <span id="title-text">
+                            Jenkins SOE : Building the SOE
+                        </span>
+                    </h1>
+                </div>
+
+                <div id="content" class="view">
+                    <div class="page-metadata">
+                        
+        
+    
+        
+    
+        
+        
+            Created by <span class='author'> Geoff Gatward</span>, last modified on Aug 12, 2017
+                        </div>
+                    <div id="main-content" class="wiki-content group">
+                    <h3 id="BuildingtheSOE-BuildingtheDevelopmentSOE">Building the Development SOE</h3><p>The first time you build the SOE, the initial artefacts will be generated and pushed to the Satellite server. One thing that needs to be done AFTER this first build is to associate the Development SOE Kickstart template with the Development SOE hostgroups, so that the test build hosts will kickstart from the DEV products. This is done by editing the SOE_dev_kickstart template and setting the association tab to contain not only the relvant OS selections, but also the development host group and environments.</p><p>When you are ready to test the SOE in the DEVELOPMENT environment, simply run the 'Server SOE' job from the SOE development branch.  The build will progress along the pipeline, with all configured test hosts being rebuilt in parallel. Once the hosts are built, they will have the test cases run against them. Only if <em>ALL</em> of the hosts test cases pass will the Dev build be marked as successful. On a successful development build cycle, the main job will be marked with a tick icon to the build history panel indicating that the dev testing was good.</p><p>At this point it can be manually promoted to the Production environment if desired, by an approver clicking on the 'Approval' stage of the pipeline. The approval will be available for a length of time configured in the Jenkinsfile, the defalt being 1 day. After this time, the job will abort and promotion will not be possible. If multiple jobs are run and waiting for promotion approval, accepting one job will cause any OLDER builds to be aborted, so only the most recent build will be promoted.</p><p><br/></p><p>Once successfully promoted into production, a green square icon will be added to the build history panel in Jenkins to show that this has occurred.</p><p><span class="confluence-embedded-file-wrapper"><img class="confluence-embedded-image confluence-content-image-border" src="attachments/58294334/78741606.png" data-image-src="attachments/58294334/78741606.png" data-unresolved-comment-count="0" data-linked-resource-id="78741606" data-linked-resource-version="1" data-linked-resource-type="attachment" data-linked-resource-default-alias="jks2.png" data-base-url="https://redhat-anzservices.atlassian.net/wiki" data-linked-resource-content-type="image/png" data-linked-resource-container-id="58294334" data-linked-resource-container-version="2" data-media-id="3b04ea1b-b746-4ea1-af5b-31c4ba20b9d3" data-media-type="file"></span></p><p><br/></p><h2 id="BuildingtheSOE-Testcases">Test cases</h2><p>When the pipeline executes the functional tests on the test VM hosts, it uses the BATS utility (<a href="https://github.com/sstephenson/bats" class="external-link" rel="nofollow">https://github.com/sstephenson/bats</a>) to produce an output in TAP (Test Anything Protocol) format. Jenkins interperets the results and will either pass or fail the pipeline based on the result. The test results can be accessed via the 'TAP Extended Test Results' option within the build output, and a summary of test results will be presented on the main job page in Jenkins.</p><p><span class="confluence-embedded-file-wrapper confluence-embedded-manual-size"><img class="confluence-embedded-image confluence-content-image-border" height="614" width="1359" src="attachments/58294334/78807114.png?width=1359" data-image-src="attachments/58294334/78807114.png" data-unresolved-comment-count="0" data-linked-resource-id="78807114" data-linked-resource-version="1" data-linked-resource-type="attachment" data-linked-resource-default-alias="jks3.png" data-base-url="https://redhat-anzservices.atlassian.net/wiki" data-linked-resource-content-type="image/png" data-linked-resource-container-id="58294334" data-linked-resource-container-version="2" data-media-id="babdb45f-5445-429b-b0a2-aeb6ed6e0957" data-media-type="file"></span></p><p><br/></p><p><span class="confluence-embedded-file-wrapper"><img class="confluence-embedded-image confluence-content-image-border" src="attachments/58294334/78872655.png" data-image-src="attachments/58294334/78872655.png" data-unresolved-comment-count="0" data-linked-resource-id="78872655" data-linked-resource-version="1" data-linked-resource-type="attachment" data-linked-resource-default-alias="jks4.png" data-base-url="https://redhat-anzservices.atlassian.net/wiki" data-linked-resource-content-type="image/png" data-linked-resource-container-id="58294334" data-linked-resource-container-version="2" data-media-id="acf5e35d-6f14-49d3-8dd5-e8124bc4c05e" data-media-type="file"></span></p><h3 id="BuildingtheSOE-PromotingtheSOEtoproduction">Promoting the SOE to production</h3><p>When everything has tested successfully, the build can be promoted into production by an approver accepting the promotion at the 'Approval' stage in the pipeline.</p><p>The promotion process will do the following (using the stored SCM Git checkout that passed the dev testing):</p><ul><li>Create a version number for the SOE and write this to the production 'soe-release' file</li><li>Perform a string replacement of SOE_DEV with SOE_PROD in all kickstart erb files</li><li>Merge the updated SOE artefacts to the 'master' branch of the SOE repository</li><li>Create a Git Tag of the version number</li><li>Push the production artefects to Satellite 6</li><li>Build and test any configured production sanity test VM's</li><li>Give a final 'All OK' promotion status</li></ul>
+                    </div>
+
+                                        <div class="pageSection group">
+                        <div class="pageSectionHeader">
+                            <h2 id="attachments" class="pageSectionTitle">Attachments:</h2>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/58294334/78741606.png">jks2.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/58294334/78807114.png">jks3.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/58294334/78872655.png">jks4.png</a> (image/png)
+                                <br/>
+                                                    </div>
+                    </div>
+                    
+                                                      
+                </div>             </div> 
+            <div id="footer" role="contentinfo">
+                <section class="footer-body">
+                    <p>Document generated by Confluence on Aug 12, 2017 18:01</p>
+                    <div id="footer-logo"><a href="http://www.atlassian.com/">Atlassian</a></div>
+                </section>
+            </div>
+        </div>     </body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Jenkins SOE : vSphere</title>
+        <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+
+    <body class="theme-default aui-theme-default">
+        <div id="page">
+            <div id="main" class="aui-page-panel">
+                <div id="main-header">
+                    <div id="breadcrumb-section">
+                        <ol id="breadcrumbs">
+                            <li class="first">
+                                <span><a href="index.html">Jenkins SOE</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Jenkins-Home_56197143.html">Jenkins Home</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Setup_58261522.html">Setup</a></span>
+                            </li>
+                                                </ol>
+                    </div>
+                    <h1 id="title-heading" class="pagetitle">
+                                                <span id="title-text">
+                            Jenkins SOE : vSphere
+                        </span>
+                    </h1>
+                </div>
+
+                <div id="content" class="view">
+                    <div class="page-metadata">
+                        
+        
+    
+        
+    
+        
+        
+            Created by <span class='author'> Geoff Gatward</span>, last modified on Aug 12, 2017
+                        </div>
+                    <div id="main-content" class="wiki-content group">
+                    <p><style type='text/css'>/*<![CDATA[*/
+div.rbtoc1502524885423 {padding: 0px;}
+div.rbtoc1502524885423 ul {list-style: disc;margin-left: 0px;}
+div.rbtoc1502524885423 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='toc-macro rbtoc1502524885423'>
+<ul class='toc-indentation'>
+<li><a href='#vSphere-Choosingamethod'>Choosing a method</a></li>
+<li><a href='#vSphere-vSpherePermissions'>vSphere Permissions</a>
+<ul class='toc-indentation'>
+<li><a href='#vSphere-Satellite6ComputeResource'>Satellite 6 Compute Resource</a></li>
+<li><a href='#vSphere-JenkinsDirect'>Jenkins Direct</a>
+<ul class='toc-indentation'>
+<li><a href='#vSphere-PXEOnly'>PXE Only</a></li>
+<li><a href='#vSphere-Templating'>Templating</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div></p><p>This project can integrate with vSphere in one of two ways:</p><ol><li>Satellite 6 Compute Resource<br/>In this configuration, Satellite 6 must have vCenter configured as a compute resource. Commands to power cycle VMs are given to Satellite via hammer/API calls, and Satellite in turn interfaces with the vCenter API.<br/><br/></li><li>Jenkins direct to vCenter<br/>In this configuration, Jenkins interfaces directly with the vCenter API using Ansible plays run on the Jenkins host executing the job.</li></ol><p>In both methods, the user accessing vCenter requires a minimum set of permissions in order to perform the required actions on the VMs.</p><h2 id="vSphere-Choosingamethod">Choosing a method</h2><p>The method used to reboot VMs is configured in the branch-specifc YAML configuration file at the top level of the project, and is configured per VM.</p><p>In the example YAML configuration section below, two hosts are defined as the kickstart hosts. One is rebooted via Satellite 6 and the other is rebooted via Jenkins vCenter direct integration.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># Hosts that will be kickstarted (Full build via KS)
+# &#39;reboot&#39; defines what controls reboot of our VMs: [sat6|vmware|manual]
+ksHosts:
+  - host1:
+    name: soe-ks-7vmw.lab.home.gatwards.org
+    reboot: vmware
+  - host2:
+    name: soe-ks-6vmw.lab.home.gatwards.org
+    reboot: sat6
+</pre>
+</div></div><p>In the event that NO integration is possible with vSphere (yes, some customers can be THAT annoying), a third option on 'manual' is available. For hosts with this method defined, the pipeline will pause for 5 minutes at the point it is expecting the VM's to be rebooted. This is to give you time to manually reboot each host from the VMware console and initiate the rebuilds. If the timeout is reached and the hosts have not been rebooted, the pipeline will fail at that point.</p><h2 id="vSphere-vSpherePermissions">vSphere Permissions</h2><h3 id="vSphere-Satellite6ComputeResource">Satellite 6 Compute Resource</h3><p>Satellite expects the following permission set to be configured on the account used for the integration.</p><p><span style="color: rgb(255,0,0);">&lt;As per Satellite integration guide&gt;</span></p><p><br/></p><h3 id="vSphere-JenkinsDirect">Jenkins Direct</h3><p>Depending on the build method, a narrower set of permissions on the vCenter end may be used for Jenkins to perform the necessary tasks.</p><h4 id="vSphere-PXEOnly">PXE Only</h4><p><span style="color: rgb(255,0,0);">Power Off</span></p><p><span style="color: rgb(255,0,0);">Power On</span></p><p><span style="color: rgb(255,0,0);">Reset</span></p><p><br/></p><h4 id="vSphere-Templating">Templating</h4><p><span style="color: rgb(255,0,0);">Power Off</span></p><p><span style="color: rgb(255,0,0);">Power On</span></p><p><span style="color: rgb(255,0,0);">Reset</span></p><p><span style="color: rgb(255,0,0);">Create Snapshot</span></p><p><span style="color: rgb(255,0,0);">Remove Snapshot</span></p><p><span style="color: rgb(255,0,0);">Clone</span></p><p><span style="color: rgb(255,0,0);">Allocate Storage</span></p><p>...</p><p>...</p><p><span style="color: rgb(255,0,0);">&lt;To be verified by elimination&gt;</span></p><p>...</p>
+                    </div>
+
+                    
+                                                      
+                </div>             </div> 
+            <div id="footer" role="contentinfo">
+                <section class="footer-body">
+                    <p>Document generated by Confluence on Aug 12, 2017 18:01</p>
+                    <div id="footer-logo"><a href="http://www.atlassian.com/">Atlassian</a></div>
+                </section>
+            </div>
+        </div>     </body>
+</html>

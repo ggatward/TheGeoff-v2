@@ -18,7 +18,7 @@ satellite:
 
 # Definitions for our VMware environment
 # Host is required. If not using VMware set a dummy hostname.
-# DataCenter, Cluster and Template Folder all required for Tamplating and Image provisioning
+# DataCenter, Cluster and Template Folder all required for Templating and Image provisioning
 VMware:
   vmwHost: vcenter.example.org
   vmwDC: Home

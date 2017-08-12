@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Jenkins SOE : Satellite 6</title>
+        <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+
+    <body class="theme-default aui-theme-default">
+        <div id="page">
+            <div id="main" class="aui-page-panel">
+                <div id="main-header">
+                    <div id="breadcrumb-section">
+                        <ol id="breadcrumbs">
+                            <li class="first">
+                                <span><a href="index.html">Jenkins SOE</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Jenkins-Home_56197143.html">Jenkins Home</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Setup_58261522.html">Setup</a></span>
+                            </li>
+                                                </ol>
+                    </div>
+                    <h1 id="title-heading" class="pagetitle">
+                                                <span id="title-text">
+                            Jenkins SOE : Satellite 6
+                        </span>
+                    </h1>
+                </div>
+
+                <div id="content" class="view">
+                    <div class="page-metadata">
+                        
+        
+    
+        
+    
+        
+        
+            Created by <span class='author'> Geoff Gatward</span>, last modified on Jul 11, 2017
+                        </div>
+                    <div id="main-content" class="wiki-content group">
+                    <p><style type='text/css'>/*<![CDATA[*/
+div.rbtoc1502524884898 {padding: 0px;}
+div.rbtoc1502524884898 ul {list-style: disc;margin-left: 0px;}
+div.rbtoc1502524884898 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='toc-macro rbtoc1502524884898'>
+<ul class='toc-indentation'>
+<li><a href='#Satellite6-SupportedSatelliteVersions'>Supported Satellite Versions</a></li>
+<li><a href='#Satellite6-ComputeResources'>Compute Resources</a>
+<ul class='toc-indentation'>
+<li><a href='#Satellite6-AlternativevSphereintegration'>Alternative vSphere integration</a></li>
+</ul>
+</li>
+<li><a href='#Satellite6-Requiredrepositories'>Required repositories</a></li>
+<li><a href='#Satellite6-RequiredHostGroups'>Required Host Groups</a></li>
+<li><a href='#Satellite6-InitialProvisioningofServers'>Initial Provisioning of Servers</a></li>
+<li><a href='#Satellite6-r10kinstallationandsetup'>r10k installation and setup</a>
+<ul class='toc-indentation'>
+<li><a href='#Satellite6-Installr10k'>Install r10k</a></li>
+<li><a href='#Satellite6-r10kuser'>r10k user</a></li>
+<li><a href='#Satellite6-r10kenvironment'>r10k environment</a></li>
+<li><a href='#Satellite6-r10kconfiguration'>r10k configuration</a></li>
+</ul>
+</li>
+<li><a href='#Satellite6-Jenkinsuser'>Jenkins user</a></li>
+</ul>
+</div></p><p>This project uses Satellite 6 to build RHEL hosts in virtual environments. The following requirements exist for this project</p><h2 id="Satellite6-SupportedSatelliteVersions">Supported Satellite Versions</h2><p>This project has been tested against the following Satellite releases.</p><ul><li>Satellite 6.2.z</li></ul><p><br/></p><h2 id="Satellite6-ComputeResources">Compute Resources</h2><p>The Jenkins pipeline uses Satellite to build new RHEL hosts, and requires the ability to reboot these hosts during the build process.</p><p>To achieve this, Satellite 6 uses Compute Resources to interact with the hosting environment and control the build and reboot of the VMs used by the pipeline. The pipeline has been tested using the following Compute Resource integrations:</p><ul><li>vSphere 5.5</li><li>RHEV 3.5, 3.6</li><li>Libvirt</li></ul><p>Setting up compute resources in Satellite 6 is not covered within this project.</p><h3 id="Satellite6-AlternativevSphereintegration">Alternative vSphere integration</h3><p>The Jenkins pipeline has been developed around a customer that does not allow Satellite 6 &lt;&gt; vSphere integration, but has allowed Jenkins limited access via vCenter to reboot the test VMs.</p><p>To accomodate this, a configuration option within the pipeline can instruct Jenkins to communicate directly with vCenter for the required commands. This is detailed in the Configuration section.</p><h2 id="Satellite6-Requiredrepositories">Required repositories</h2><p>The project was developed to build both RHEL 6 and RHEL 7 servers. The repositories required will depend on the build requirements for the customer, but typically will be:</p><ul><li>Server Kickstart,</li><li>Server RPMs,</li><li>Extra RPMs,</li><li>Optional RPMs,</li><li>Common RPMs Server</li><li>Satellite 6.x Tools</li><li>EPEL</li></ul><p><br/></p><h2 id="Satellite6-RequiredHostGroups">Required Host Groups</h2><p>Dedicated Host Groups will need to be configured on the Satellite server for the Jenkins-managed hosts.  One Host Group needs to be created for each RHEL version being tested. During development the Host Groups created were as follows:</p><ul><li>RHEL6-SOE                  - RHEL6 PXE kickstart</li><li>RHEL7-SOE                  - RHEL7 PXE kickstart</li><li>RHEL6-SOE-Template  - RHEL6 Gold Image - PXE bootstrap  (VMware only)</li><li>RHEL7-SOE-Template  - RHEL7 Gold Image - PXE bootstrap  (VMware only)</li><li>RHEL6-IMAGE              - RHEL6 VM deployed from Gold Image  (VMware only)</li><li>RHEL7-IMAGE              - RHEL7 VM deployed from Gold Image  (VMware only)</li></ul><p>These Host Groups require a known root password to be set within them - this is used by Jenkins for the functional testing of the hosts during the pipeline.</p><h2 id="Satellite6-InitialProvisioningofServers">Initial Provisioning of Servers</h2><p>All hosts that will be used by the Jenkins pipeline need to be initially created within Satellite, and must also exist in the hosting environment.</p><p>The VMs must be configured to boot from network before local hard drive - typically this is a BIOS setting that will need to be updated within the VM container. This ensures that when Jenkins initiates a reboot of the VM, it will perform a new PXE boot and re-installation of the OS.</p><p><br/></p><h2 id="Satellite6-r10kinstallationandsetup">r10k installation and setup</h2><p>The Jenkins project uses r10k to deploy puppet modules to the Satellite server. For this to take place we need to create a non-privileged generic or service account on the Satellite and any Capsules. This account will be used to deploy the puppet modules. The default user in the project is  'svc-r10k'</p><h3 id="Satellite6-Installr10k">Install r10k</h3><p>r10k is a ruby gem that needs to be installed on the Satellite server for this project to make use of.</p><p>If the Satellite server cannot reach the Internet gem mirrors, a local gem mirror can be set up. In this case, the default gem location can be changed to this mirror:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># </pre>
+</div></div><p><br/></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># gem install r10k</pre>
+</div></div><p><br/></p><p>If no gem mirror is accessible at all, the r10k gem and its dependencies will need to be manually downloaded and copied to the Satellite server. Once the individual gems have been copied they can be installed:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># </pre>
+</div></div><p><br/></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">-rw-rw-r--. 1      1146800017   1146800017    5632 Sep 21  2016 colored-1.2.gem
+-rw-rw-r--. 1      1146800017   1146800017   23552 Sep 21  2016 cri-2.6.1.gem
+-rw-rw-r--. 1      1146800017   1146800017   35840 Sep 21  2016 faraday-0.9.2.gem
+-rw-rw-r--. 1      1146800017   1146800017   16384 Sep 21  2016 faraday_middleware-0.10.0.gem
+-rw-rw-r--. 1      1146800017   1146800017   26112 Sep 21  2016 fast_gettext-1.1.0.gem
+-rw-rw-r--. 1      1146800017   1146800017  283648 Sep 21  2016 gettext-3.2.2.gem
+-rw-rw-r--. 1      1146800017   1146800017   10240 Sep 21  2016 gettext-setup-0.7.gem
+-rw-rw-r--. 1      1146800017   1146800017  103424 Sep 21  2016 locale-2.1.2.gem
+-rw-rw-r--. 1      1146800017   1146800017  118272 Sep 21  2016 log4r-1.1.10.gem
+-rw-rw-r--. 1      1146800017   1146800017   23552 Sep 21  2016 minitar-0.5.4.gem
+-rw-r--r--. 1      1146800017   1146800017   26112 Sep 21  2016 multi_json-1.12.1.gem
+-rw-r--r--. 1      1146800017   1146800017   11264 Sep 21  2016 multipart-post-2.0.0.gem
+-rw-rw-r--. 1      1146800017   1146800017  771072 Sep 21  2016 puppet_forge-2.2.2.gem
+-rw-rw-r--. 1      1146800017   1146800017  186368 Sep 21  2016 r10k-2.4.3.gem
+-rw-rw-r--. 1      1146800017   1146800017   26624 Sep 21  2016 semantic_puppet-0.1.4.gem
+-rw-rw-r--. 1      1146800017   1146800017  138752 Sep 21  2016 text-1.3.1.gem</pre>
+</div></div><p><span class="confluence-embedded-file-wrapper"><a class="confluence-embedded-file" href="/wiki/download/attachments/58851359/r10k-gems.tar?version=1&amp;modificationDate=1499064775783&amp;cacheVersion=1&amp;api=v2" data-nice-type="null" data-file-src="/wiki/download/attachments/58851359/r10k-gems.tar?version=1&amp;modificationDate=1499064775783&amp;cacheVersion=1&amp;api=v2" data-linked-resource-id="58261808" data-linked-resource-type="attachment" data-linked-resource-container-id="58851359" data-linked-resource-default-alias="r10k-gems.tar" data-mime-type="application/x-tar" data-has-thumbnail="false" data-linked-resource-version="1"><img src="download/resources/com.atlassian.confluence.plugins.confluence-view-file-macro:view-file-macro-resources/images/placeholder-small-file.png" height="150"/><span class="title">r10k-gems.tar</span></a></span></p><h3 id="Satellite6-r10kuser"><br/>r10k user</h3><p>Create the r10k user on the Satellite and each Capsule</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># useradd svc-r10k -d /var/lib/r10k
+# passwd svc-r10k
+# semanage fcontext -a -t user_home_dir_t &quot;/var/lib/r10k&quot;
+# semanage fcontext -a -t ssh_home_t &quot;/var/lib/r10k/.ssh&quot;
+# restorecon -Rv /var/lib/r10k/
+# chage -M 99999 svc-r10k
+# usermod -a -G apache svc-r10k</pre>
+</div></div><p>The r10k user will need to run hammer commands, so will need to have a login to the Satellite application, and a hammer configuration to allow commands to be run.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># hammer user create --login svc-r10k --firstname r10k --lastname User --password=&#39;r10k_Passw0rd&#39; \
+  --mail no-reply@example.org --auth-source-id 1 --organization-ids 1 --default-organization-id 1 \
+  --admin true
+
+# mkdir /var/lib/r10k/.hammer
+# cat &lt;&lt; EOT &gt; /var/lib/r10k/.hammer/cli_config.yml
+:foreman:
+    :host: &#39;https://localhost/&#39;
+    :username: &#39;svc-r10k&#39;
+    :password: &#39;r10k_Passw0rd&#39;
+EOT
+# chown -R svc-r10k:svc-r10k /var/lib/r10k/.hammer/</pre>
+</div></div><p>Next, the r10k user will need to have password-less SSH access between the Satellite and each Capsule in order to copy the puppet modules.</p><p>Switch to the svc-r10k user on the Satellite, generate an SSH key and copy it to all capsules.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># su - svc-r10k
+$ ssh-keygen -t rsa
+$ ssh-copy-id &lt;capsule&gt;</pre>
+</div></div><p>Verify that the svc-r10k user can ssh to each capsule without a password.</p><p>Finally, on the Jenkins server, copy the SSH key to the Satellite server as the svc-r10k user.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># su - jenkins
+$ ssh-copy-id svc-r10k@&lt;satellite&gt;</pre>
+</div></div><p>Verify that the jenkins user can ssh from the Jenkins server to the Satellite as the svc-r10k user without a password.</p><h3 id="Satellite6-r10kenvironment">r10k environment</h3><p>Create an r10k environment directory on the Satellite and each capsule. This environment path is OUTSIDE the default /etc/puppet/environments location, as r10k will REMOVE any environments it finds but does not manage. In this case, our SOE will have its own environment path, allowing other users and projects to also use the r10k functionality for additional environments if required.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># mkdir -p /etc/puppet/r10k/environments/SOE
+# chown -R svc-r10k:apache /etc/puppet/r10k
+# chmod -R 2775 /etc/puppet/r10k</pre>
+</div></div><h3 id="Satellite6-r10kconfiguration">r10k configuration</h3><p>r10k uses a master configuration file to control what is deployed. For the SOE, we use a single config file that defines all of the Git branches being built.</p><p>This file should be created as <strong>/etc/puppet/r10k/r10k_SOE.yaml</strong> and should contain the following:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">---
+:cachedir: /var/lib/r10k/r10k-cache
+:sources:
+  :RHEL_SOE:
+    remote: https://github.com/ggatward/RHEL-Builder
+    basedir: /etc/puppet/r10k/environments/SOE
+    prefix: true
+forge:
+  baseurl: &#39;https://forgeapi.puppetlabs.com&#39;
+postrun: [&#39;/bin/bash&#39;, &#39;/etc/puppet/r10k/post_deploy.sh&#39;, &#39;/etc/puppet/r10k/environments/SOE&#39;]</pre>
+</div></div><p>In this file, we define the sources for deployment, in this case being a project named RHEL_SOE. For that project, we define the Git repository containing the Puppetfile (Puppet module definitions) - in this case it is contained within the main project. We also need to define the base directory on Satellite that the puppet environment will be deployed to - this is the directory we created earlier.</p><p>The 'forge' section defines where modules from Puppet Forge can be located - if the customer environment is not able to access the real Puppet Forge site, an offline mirror that provides the required API can be set up, and the URL of this mirror defined here.</p><p>The 'postrun' section defines the script that will be executed once r10k has deployed the puppet modules - in this case the script will use rsync to copy the puppet environment to all Capsules and also link the r10k environment into the main puppet environment so that it is visible to Satellite. It will also import the environment into Satellite using hammer.</p><p>The following script is included in the Jenkins project, but must be copied onto the Satellite server before the project can be run.  The script should exist in  <strong>/etc/puppet/r10k/post_deploy.sh</strong></p><div class="confluence-information-macro confluence-information-macro-note"><span class="aui-icon aui-icon-small aui-iconfont-warning confluence-information-macro-icon"></span><div class="confluence-information-macro-body"><p>For now, the PUPPET_LOCATIONS and Organizations in the script are hard-coded - be sure to set them appropriately</p></div></div><p><strong class="auto-cursor-target"><br class="auto-cursor-target"/></strong></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">ENVPATH=$1
+logger -t r10k &quot;Deploying $ENVPATH&quot;
+for i in `ls $ENVPATH`; do
+  ln -sd $ENVPATH/$i /etc/puppet/environments/$i
+  unlink $ENVPATH/$i/$i
+
+  # Create/Update puppet environments in Satellite
+#  PUPPET_LOCATIONS=HOME,REMOTE,SITE3
+  PUPPET_LOCATIONS=HOME
+  if [ $(hammer environment list | awk &#39;/^[0-9]/ { print $3 }&#39; | grep -c $i) -eq 0 ]; then
+    hammer environment create --name $i --locations ${PUPPET_LOCATIONS} --organizations DIG
+  else
+    hammer environment update --name $i --locations ${PUPPET_LOCATIONS} --organizations DIG
+  fi
+
+  # Import the puppet classes
+  hammer proxy import-classes --id 1 --environment $i
+done
+
+# rsync to capusles
+for capsule in $(hammer --csv capsule list | grep -iv Id | cut -f2 -d,); do
+  logger -t r10k &quot;Deploying puppet modules for $ENVPATH to $capsule&quot;
+  rsync -avz --delete $ENVPATH/* $capsule:$ENVPATH
+  ssh -q $capsule &quot;for i in \$(ls ${ENVPATH}); do ln -sf ${ENVPATH}/\$i /etc/puppet environments/\$i; done&quot;
+  ssh -q $capsule &quot;for i in \$(ls ${ENVPATH}); do unlink ${ENVPATH}/\$i/\$i; done&quot;
+done</pre>
+</div></div><p><br/></p><h2 id="Satellite6-Jenkinsuser">Jenkins user</h2><div class="confluence-information-macro confluence-information-macro-note"><span class="aui-icon aui-icon-small aui-iconfont-warning confluence-information-macro-icon"></span><div class="confluence-information-macro-body"><p>Currently, a Jenkins user needs to be created on the Satellite (but not Capsules) in order for the Jenkins pipeline to run hammer commands on the Satellite server.  </p><p>This functionality will be replaced by API calls in a future release of this project</p></div></div><p><br/></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># useradd svc-jenkins -d /var/lib/jenkins
+# passwd svc-jenkins
+# semanage fcontext -a -t user_home_dir_t &quot;/var/lib/jenkins&quot;
+# semanage fcontext -a -t ssh_home_t &quot;/var/lib/jenkins/.ssh&quot;
+# restorecon -Rv /var/lib/jenkins
+# chage -M 99999 svc-jenkins
+# usermod -a -G apache svc-jenkins</pre>
+</div></div><p>The jenkins user will need to run hammer commands, so will need to have a login to the Satellite application, and a hammer configuration to allow commands to be run.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># hammer user create --login svc-jenkins --firstname Jenkins --lastname User --password=&#39;jks_Passw0rd&#39; \
+  --mail no-reply@example.org --auth-source-id 1 --organization-ids 1 --default-organization-id 1 \
+  --admin true
+
+
+# cat &lt;&lt; EOT &gt; /var/lib/jenkins/.hammer/cli_config.yml
+:foreman:
+    :host: &#39;https://localhost/&#39;
+    :username: &#39;svc-jenkins&#39;
+    :password: &#39;jks_Passw0rd&#39;
+    :request_timeout: 300
+EOT</pre>
+</div></div><p><br/>Finally, on the Jenkins server, copy the SSH key to the Satellite server</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># su - jenkins
+$ ssh-copy-id svc-jenkins@&lt;satellite&gt;</pre>
+</div></div><p>Verify that the jenkins user can ssh from the Jenkins server to the Satellite as the svc-jenkins user without a password.</p>
+                    </div>
+
+                                        <div class="pageSection group">
+                        <div class="pageSectionHeader">
+                            <h2 id="attachments" class="pageSectionTitle">Attachments:</h2>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/58851359/58261808.tar">r10k-gems.tar</a> (application/x-tar)
+                                <br/>
+                                                    </div>
+                    </div>
+                    
+                                                      
+                </div>             </div> 
+            <div id="footer" role="contentinfo">
+                <section class="footer-body">
+                    <p>Document generated by Confluence on Aug 12, 2017 18:01</p>
+                    <div id="footer-logo"><a href="http://www.atlassian.com/">Atlassian</a></div>
+                </section>
+            </div>
+        </div>     </body>
+</html>

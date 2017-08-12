@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Jenkins SOE : Installing Jenkins (Slave)</title>
+        <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+
+    <body class="theme-default aui-theme-default">
+        <div id="page">
+            <div id="main" class="aui-page-panel">
+                <div id="main-header">
+                    <div id="breadcrumb-section">
+                        <ol id="breadcrumbs">
+                            <li class="first">
+                                <span><a href="index.html">Jenkins SOE</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Jenkins-Home_56197143.html">Jenkins Home</a></span>
+                            </li>
+                                                    <li>
+                                <span><a href="Setup_58261522.html">Setup</a></span>
+                            </li>
+                                                </ol>
+                    </div>
+                    <h1 id="title-heading" class="pagetitle">
+                                                <span id="title-text">
+                            Jenkins SOE : Installing Jenkins (Slave)
+                        </span>
+                    </h1>
+                </div>
+
+                <div id="content" class="view">
+                    <div class="page-metadata">
+                        
+        
+    
+        
+    
+        
+        
+            Created by <span class='author'> Geoff Gatward</span>, last modified on Jul 18, 2017
+                        </div>
+                    <div id="main-content" class="wiki-content group">
+                    <p><style type='text/css'>/*<![CDATA[*/
+div.rbtoc1502524884078 {padding: 0px;}
+div.rbtoc1502524884078 ul {list-style: disc;margin-left: 0px;}
+div.rbtoc1502524884078 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='toc-macro rbtoc1502524884078'>
+<ul class='toc-indentation'>
+<li><a href='#InstallingJenkins(Slave)-BuildOS'>Build OS</a></li>
+<li><a href='#InstallingJenkins(Slave)-InstallRequiredPackages'>Install Required Packages</a></li>
+<li><a href='#InstallingJenkins(Slave)-ConfigureJenkinsSlave(OS)'>Configure Jenkins Slave (OS)</a></li>
+<li><a href='#InstallingJenkins(Slave)-ConfigureJenkinsSlave(Application)'>Configure Jenkins Slave (Application)</a></li>
+</ul>
+</div></p><h2 id="InstallingJenkins(Slave)-BuildOS">Build OS</h2><p>If using a VM for Jenkins, it needs to have at least 4Gb RAM and 50Gb available in /var/lib/jenkins.</p><div class="confluence-information-macro confluence-information-macro-information"><span class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon"></span><div class="confluence-information-macro-body"><p>We are not covering the build of a VM for Jenkins here - once the machine is build with a basic RHEL 7 OS the following applies.</p></div></div><p>We need the following repositories enabled:</p><ul><li>RHEL 7 Server</li><li>RHEL 7 Server Optional</li><li>RHEL 7 Satellite Tools</li><li>EPEL 7</li></ul><p>Assuming that we are getting content from Red Hat (CDN or Satellite):</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># subscription-manager repos --enable rhel-server-7-rpms --enable rhel-server-7-optional-rpms --enable rhel-7-server-satellite-6.2-rpms</pre>
+</div></div><p>If we have an internet connection and can access EPEL directly:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence"># rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
+# cat &lt;&lt; EOT &gt; /etc/yum.repos.d/epel.repo
+[jenkins]
+name=EPEL
+baseurl=https://dl.fedoraproject.org/pub/epel/7/x86_64
+gpgcheck=1
+EOT</pre>
+</div></div><h2 id="InstallingJenkins(Slave)-InstallRequiredPackages">Install Required Packages</h2><p>Jenkins is built on Java, so requires a JRE to be installed. The default RHEL openjdk 1.8 works well and should be used.</p><p>Install the additional RPM's required for Jenkins and our specific project use case. Jenkins itself does NOT need to be installed on the slave, as the master will install the required Jenkins components.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">yum -y install git nc java-1.8.0-openjdk ansible python2-pyvmomi python2-pip</pre>
+</div></div><p>This project requires the use of 'pyshpere', which is not available as an RPM. To install this package we need to use the pip installer. We are setting the umask here as some base OS installations may have hardened this.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">umask 0022
+pip install pysphere</pre>
+</div></div><div class="confluence-information-macro confluence-information-macro-note"><span class="aui-icon aui-icon-small aui-iconfont-warning confluence-information-macro-icon"></span><div class="confluence-information-macro-body"><p>In a disconnected environment without a PyPI mirror, you will need to download the pysphere source from <a href="https://github.com/argos83/pysphere/archive/master.zip" class="external-link" rel="nofollow">https://github.com/argos83/pysphere/archive/master.zip</a> and install it manually</p></div></div><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">unzip pysphere.zip
+cd pysphere-master
+python setup.py install</pre>
+</div></div><h2 id="InstallingJenkins(Slave)-ConfigureJenkinsSlave(OS)">Configure Jenkins Slave (OS)</h2><p>Add the jenkins user, and set an initial password.</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">useradd jenkins -d /var/lib/jenkins
+passwd jenkins</pre>
+</div></div><p>Set the selinux contexts of the jenkins home directory, as this is outside the standard /home structure</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">semanage fcontext -a -t ssh_home_t &quot;/var/lib/jenkins/.ssh(.*)?&quot;
+restorecon -Rv /var/lib/jenkins/.ssh</pre>
+</div></div><p>If using access.conf, allow the jenkins user access to SSH into the host</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">sed -i &#39;/@role-unix-support/a+ : jenkins : ALL&#39; /etc/security/access.conf</pre>
+</div></div><p><span style="color: rgb(255,0,0);">Add the jenkins user to the sudoers - <span style="color: rgb(255,0,0);">(Verify this - may not be required for SOE slave but the RPMBuilder projects)</span></span></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">cat &lt;&lt; EOF &gt; /etc/sudeoers.d/jenkins
+jenkins    ALL=(ALL)    NOPASSWD: ALL
+#
+Defaults:jenkins !requiretty
+EOF</pre>
+</div></div><p>Copy the SSH keys for the jenkins user from the master to the slave</p><div class="confluence-information-macro confluence-information-macro-information"><span class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon"></span><div class="confluence-information-macro-body"><p>Because the jenkins slaves will be the hosts logging into Satellite/Git, we will copy the keys from the Jenkins master to each slave. This allows us to easily (re)deploy slaves without needing to add many SSH keys to the Git repos and SSH access lists.</p></div></div><div class="code panel pdl" style="border-width: 1px;"><div class="codeContent panelContent pdl">
+<pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">mkdir -p /var/lib/jenkins/.ssh
+cat &lt;&lt; EOF &gt; /var/lib/jenkins/.ssh/id_rsa
+-----BEGIN RSA PRIVATE KEY-----
+&lt;key here&gt;
+-----END OF RSA PRIVATE KEY-----
+EOF
+
+cat &lt;&lt; EOF &gt; /var/lib/jenkins/.ssh/id_rsa.pub
+ssh-rsa AAAAA............
+EOF
+
+# Allow password-less SSH for jenkins
+cat &lt;&lt; EOF &gt;&gt; /var/lib/jenkins/.ssh/authorized_keys
+ssh-rsa AAAAA............
+EOF
+
+# Add public SSH key for Git server
+cat &lt;&lt; EOF &gt;&gt; /var/lib/jenkins/.ssh/known_hosts
+ssh-rsa AAAAA............
+EOF
+
+chown -R jenkins:jenkins /var/lib/jenkins/.ssh
+chmod 0700 /var/lib/jenkins/.ssh
+chmod 0600 /var/lib/jenkins/.ssh/*
+chmod 0644 /var/lib/jenkins/.ssh/known_hosts</pre>
+</div></div><p>Verify that the Jenkins user can SSH from the Master to the slave without password, and that the jenkins user can perform a git clone action from the git repository server.</p><h2 id="InstallingJenkins(Slave)-ConfigureJenkinsSlave(Application)">Configure Jenkins Slave (Application)</h2><p>Now that the OS and user accounts are configured, we can set up the Jenkins application.</p><ul><li>Login to the master WebUI, and click on Manage Jenkins → Manage Nodes</li><li>Click on 'New Node'</li><li>Enter a short descriptive node name, and select 'Permanent Agent', then click OK</li></ul><p style="padding-left: 30.0px;"><span class="confluence-embedded-file-wrapper"><img class="confluence-embedded-image confluence-content-image-border" src="attachments/58359845/65863716.png" data-image-src="attachments/58359845/65863716.png" data-unresolved-comment-count="0" data-linked-resource-id="65863716" data-linked-resource-version="1" data-linked-resource-type="attachment" data-linked-resource-default-alias="sl01.png" data-base-url="https://redhat-anzservices.atlassian.net/wiki" data-linked-resource-content-type="image/png" data-linked-resource-container-id="58359845" data-linked-resource-container-version="3" data-media-id="5d82a267-a46e-4e2e-8c81-8c46392cc5e2" data-media-type="file"></span></p><ul><li>Enter a description for this slave</li><li>Enter the number of executors for this slave (2x CPU cores)</li><li>Set the remainder of the form as shown:</li></ul><p style="padding-left: 30.0px;"><span class="confluence-embedded-file-wrapper"><img class="confluence-embedded-image confluence-content-image-border" src="attachments/58359845/65863721.png" data-image-src="attachments/58359845/65863721.png" data-unresolved-comment-count="0" data-linked-resource-id="65863721" data-linked-resource-version="2" data-linked-resource-type="attachment" data-linked-resource-default-alias="sl02.png" data-base-url="https://redhat-anzservices.atlassian.net/wiki" data-linked-resource-content-type="image/png" data-linked-resource-container-id="58359845" data-linked-resource-container-version="3" data-media-id="b46b397f-ad85-43fc-ab45-26ba654f648c" data-media-type="file"></span></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p>
+                    </div>
+
+                                        <div class="pageSection group">
+                        <div class="pageSectionHeader">
+                            <h2 id="attachments" class="pageSectionTitle">Attachments:</h2>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/58359845/65863716.png">sl01.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/58359845/65208468.png">sl02.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/58359845/65863721.png">sl02.png</a> (image/png)
+                                <br/>
+                                                    </div>
+                    </div>
+                    
+                                                      
+                </div>             </div> 
+            <div id="footer" role="contentinfo">
+                <section class="footer-body">
+                    <p>Document generated by Confluence on Aug 12, 2017 18:01</p>
+                    <div id="footer-logo"><a href="http://www.atlassian.com/">Atlassian</a></div>
+                </section>
+            </div>
+        </div>     </body>
+</html>
