@@ -85,9 +85,9 @@ else
   echo "###########################################"
   echo "#  PLEASE REBOOT $TEST_VM MANUALLY NOW    #"
   echo "#                                         #"
-  echo "# WAITING FOR 5 MINUTES BEFORE CONTINUING #"
+  echo "# WAITING FOR 2 MINUTES BEFORE CONTINUING #"
   echo "###########################################"
-  sleep 300
+  sleep 120
 fi
 
 
