@@ -7,6 +7,7 @@ def masterBranch = ''
 def sat_params = ''
 def devHash = ''
 def devHashShort = ''
+def soeMajorVer = ''
 def soeMinorVer = ''
 def vmwHost = ''
 def vmwDC = ''
@@ -38,6 +39,7 @@ lock(resource: 'Deployment', inversePrecedence: true){
       loadBranchConfig("${BRANCH_NAME}")
 
       // Set local defs from config yml
+      soeMajorVer = config.soeMajorVer
       gitUrl = config.git.gitUrl
       masterBranch = config.git.masterBranch
       def sat_org = config.satellite.sat_org
@@ -68,7 +70,7 @@ lock(resource: 'Deployment', inversePrecedence: true){
         }
 
         if (BRANCH_NAME == masterBranch) {
-          version = config.soeMajorVer + "." + lastTagMinor
+          version = soeMajorVer + "." + lastTagMinor
           echo 'Deploying production SOE version ' + version
         } else {
            // Increment minor version.
@@ -76,7 +78,7 @@ lock(resource: 'Deployment', inversePrecedence: true){
           int MinorVer = (lastTagMinorInt + 1)
           soeMinorVer = MinorVer as String
 
-          version = config.soeMajorVer + "." + soeMinorVer + "-" + currentBuild.number.toString().padLeft(3,'0')
+          version = soeMajorVer + "." + soeMinorVer + "-" + currentBuild.number.toString().padLeft(3,'0')
           echo 'Building ' + BRANCH_NAME + ' SOE version ' + version + "-git-" + devHashShort
         }
 
@@ -278,10 +280,19 @@ lock(resource: 'Deployment', inversePrecedence: true){
       }
     }
   }
+  // If we are marked as a failure, set failure icon and exit.
+  if (currentBuild.result == 'FAILURE') {
+    manager.addBadge('error.gif',"Some tests failed")
+    return
+  }
   // If we got here we can add an icon to the build history to show success so far
   manager.addBadge('success.gif',"Passed all tests")
-
 } // Release 'Deployment' lock
+
+// If we are marked as a failure, ensure we exit.
+if (currentBuild.result == 'FAILURE') {
+  return
+}
 
 // Approval & Promotion are only relevant if we are running the dev branch
 if (BRANCH_NAME != masterBranch) {
