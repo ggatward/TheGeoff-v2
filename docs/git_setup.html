@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Git Server Setup</title>
+    <style type="text/css">/*
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.6.0
+*/
+html{color:#000;background:#FFF;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}del,ins{text-decoration:none;}body{font:13px/1.231 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}body{text-align:center;}#ft{clear:both;}#doc,#doc2,#doc3,#doc4,.yui-t1,.yui-t2,.yui-t3,.yui-t4,.yui-t5,.yui-t6,.yui-t7{margin:auto;text-align:left;width:57.69em;*width:56.25em;min-width:750px;}#doc2{width:73.076em;*width:71.25em;}#doc3{margin:auto 10px;width:auto;}#doc4{width:74.923em;*width:73.05em;}.yui-b{position:relative;}.yui-b{_position:static;}#yui-main .yui-b{position:static;}#yui-main,.yui-g .yui-u .yui-g{width:100%;}{width:100%;}.yui-t1 #yui-main,.yui-t2 #yui-main,.yui-t3 #yui-main{float:right;margin-left:-25em;}.yui-t4 #yui-main,.yui-t5 #yui-main,.yui-t6 #yui-main{float:left;margin-right:-25em;}.yui-t1 .yui-b{float:left;width:12.30769em;*width:12.00em;}.yui-t1 #yui-main .yui-b{margin-left:13.30769em;*margin-left:13.05em;}.yui-t2 .yui-b{float:left;width:13.8461em;*width:13.50em;}.yui-t2 #yui-main .yui-b{margin-left:14.8461em;*margin-left:14.55em;}.yui-t3 .yui-b{float:left;width:23.0769em;*width:22.50em;}.yui-t3 #yui-main .yui-b{margin-left:24.0769em;*margin-left:23.62em;}.yui-t4 .yui-b{float:right;width:13.8456em;*width:13.50em;}.yui-t4 #yui-main .yui-b{margin-right:14.8456em;*margin-right:14.55em;}.yui-t5 .yui-b{float:right;width:18.4615em;*width:18.00em;}.yui-t5 #yui-main .yui-b{margin-right:19.4615em;*margin-right:19.125em;}.yui-t6 .yui-b{float:right;width:23.0769em;*width:22.50em;}.yui-t6 #yui-main .yui-b{margin-right:24.0769em;*margin-right:23.62em;}.yui-t7 #yui-main .yui-b{display:block;margin:0 0 1em 0;}#yui-main .yui-b{float:none;width:auto;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf,.yui-gc .yui-u,.yui-gd .yui-g,.yui-g .yui-gc .yui-u,.yui-ge .yui-u,.yui-ge .yui-g,.yui-gf .yui-g,.yui-gf .yui-u{float:right;}.yui-g div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first,.yui-ge div.first,.yui-gf div.first,.yui-g .yui-gc div.first,.yui-g .yui-ge div.first,.yui-gc div.first div.first{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf{width:49.1%;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{width:32%;margin-left:1.99%;}.yui-gb .yui-u{*margin-left:1.9%;*width:31.9%;}.yui-gc div.first,.yui-gd .yui-u{width:66%;}.yui-gd div.first{width:32%;}.yui-ge div.first,.yui-gf .yui-u{width:74.2%;}.yui-ge .yui-u,.yui-gf div.first{width:24%;}.yui-g .yui-gb div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first{margin-left:0;}.yui-g .yui-g .yui-u,.yui-gb .yui-g .yui-u,.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u,.yui-ge .yui-g .yui-u,.yui-gf .yui-g .yui-u{width:49%;*width:48.1%;*margin-left:0;}.yui-g .yui-g .yui-u{width:48.1%;}.yui-g .yui-gb div.first,.yui-gb .yui-gb div.first{*margin-right:0;*width:32%;_width:31.7%;}.yui-g .yui-gc div.first,.yui-gd .yui-g{width:66%;}.yui-gb .yui-g div.first{*margin-right:4%;_margin-right:1.3%;}.yui-gb .yui-gc div.first,.yui-gb .yui-gd div.first{*margin-right:0;}.yui-gb .yui-gb .yui-u,.yui-gb .yui-gc .yui-u{*margin-left:1.8%;_margin-left:4%;}.yui-g .yui-gb .yui-u{_margin-left:1.0%;}.yui-gb .yui-gd .yui-u{*width:66%;_width:61.2%;}.yui-gb .yui-gd div.first{*width:31%;_width:29.5%;}.yui-g .yui-gc .yui-u,.yui-gb .yui-gc .yui-u{width:32%;_float:right;margin-right:0;_margin-left:0;}.yui-gb .yui-gc div.first{width:66%;*float:left;*margin-left:0;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf .yui-u{margin:0;}.yui-gb .yui-gb .yui-u{_margin-left:.7%;}.yui-gb .yui-g div.first,.yui-gb .yui-gb div.first{*margin-left:0;}.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u{*width:48.1%;*margin-left:0;} .yui-gb .yui-gd div.first{width:32%;}.yui-g .yui-gd div.first{_width:29.9%;}.yui-ge .yui-g{width:24%;}.yui-gf .yui-g{width:74.2%;}.yui-gb .yui-ge div.yui-u,.yui-gb .yui-gf div.yui-u{float:right;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf div.first{float:left;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf div.first{*width:24%;_width:20%;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf .yui-u{*width:73.5%;_width:65.5%;}.yui-ge div.first .yui-gd .yui-u{width:65%;}.yui-ge div.first .yui-gd div.first{width:32%;}#bd:after,.yui-g:after,.yui-gb:after,.yui-gc:after,.yui-gd:after,.yui-ge:after,.yui-gf:after{content:".";display:block;height:0;clear:both;visibility:hidden;}#bd,.yui-g,.yui-gb,.yui-gc,.yui-gd,.yui-ge,.yui-gf{zoom:1;}</style>
+    <style type="text/css">/*
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.6.0
+*/
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;} em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+</style><meta name="author" content="Geoff Gatward">
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+  </head>
+  <body>
+    <div id="doc3" class="yui-t1">
+      <div id="hd">
+        <h1 style="text-align: center;">Git Setup</h1>
+      </div>
+      <div id="bd">
+        <div id="yui-main">
+          <div class="yui-b">
+            <div class="yui-g">
+              <p>All code for this project is stored in a Git repository. Any
+                Git server can be used - this project was developed using
+                GitHub, but has been deployed in environments using both
+                Atlassian&nbsp;Bitbucket and GitLab as the server.
+                &nbsp;Specific setup for each is included below, as the project
+                makes use of multiple branches of the repository, and uses
+                webhooks from the Git server to trigger production builds when
+                content is promoted.</p>
+              <p>In all cases, the master repository needs to be cloned and then
+                imported to the customer Git server. &nbsp;The master repository
+                is located on GitHub at &nbsp;<a href="https://github.com/ggatward/TheGeoff-v2"
+                  class="external-link" rel="nofollow">https://github.com/ggatward/TheGeoff-v2</a></p>
+              <p>Also, regardless of the server used, the project (by default)
+                is expecting to find two branches, named master and development.
+                &nbsp;Once the repository has been uploaded to the Git server,
+                be sure to create a n<span style="color: #040504;">ew branch
+                  called development. This branch should be set as the default
+                  branch</span><span style="color: rgb(204,153,255);"><span style="color: #040504;">,
+                    and the master branch set to be protected. This ensures that
+                    users cloning the project work on the development branch by
+                    default, and cannot accidentally commit untested changes to
+                    the master branch. </span><br>
+                </span></p>
+              <p><span style="color: rgb(204,153,255);"><br>
+                </span></p>
+              <p></p>
+              <p></p>
+              <h2 id="GitServer-Initialrepositorycreation">Initial repository
+                creation</h2>
+              <p>Create a new repository via the relevant web interface (We'll
+                call it 'RHEL-Builder').</p>
+              <p>Clone the new repository to your development server</p>
+              <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence"
+data-theme="Confluence" style="margin-left: 40px;">geoff@jenkins1[~/Projects/github] $ git clone git@github.com:ggatward/RHEL-Builder.git
+Cloning into 'RHEL-Builder'...
+warning: You appear to have cloned an empty repository.</pre>
+              <p>Copy the master project files into the new repository working
+                directory</p>
+              <p>Add all files to be tracked, commit and push them to the server
+                (You can customise the Jenkinsfile and Puppetfile here if you
+                know what you need at this stage)</p>
+              <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence"
+data-theme="Confluence" style="margin-left: 40px;">geoff@jenkins1[~/Projects/github/RHEL-Builder] *$ git add -A
+
+geoff@jenkins1[~/Projects/github/RHEL-Builder] *$ git commit -a -m "Initial Upload"
+[master (root-commit) 88d0d64] Initial Upload
+ 45 files changed, 4192 insertions(+)
+ create mode 100644 Jenkinsfile
+ create mode 100644 Puppetfile
+&lt;...snip...&gt;
+ create mode 100755 setup/r10k/post_deploy.sh
+ create mode 100644 setup/r10k/r10k_SOE.yaml
+
+geoff@jenkins1[~/Projects/github/RHEL-Builder] (master)$ git push
+Counting objects: 51, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (48/48), done.
+Writing objects: 100% (51/51), 53.65 KiB | 0 bytes/s, done.
+Total 51 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), done.
+To git@github.com:ggatward/RHEL-Builder.git
+ * [new branch]      master -&gt; master</pre>
+              <p></p>
+              <p>Create a new branch called 'development' and push it back to
+                the Git server</p>
+              <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence"
+data-theme="Confluence" style="margin-left: 40px;">geoff@jenkins1[~/Projects/github/RHEL-Builder] (master)$ git checkout -b development
+Switched to a new branch 'development'
+
+
+geoff@jenkins1[~/Projects/github/RHEL-Builder] (development)$ git push --set-upstream origin development
+Total 0 (delta 0), reused 0 (delta 0)
+To git@github.com:ggatward/RHEL-Builder.git
+ * [new branch]      development -&gt; development
+Branch development set up to track remote branch development from origin.</pre>
+              <p></p>
+              <p>The next steps will vary depending on the Git server being
+                used.</p>
+              <p><br>
+              </p>
+              <h2 id="GitServer-GitHub">GitHub</h2>
+              <h3 id="GitServer-Setthedefaultbranch">Set the default branch</h3>
+              <p>Open the 'settings' for the new repository and click on the
+                Branches link. &nbsp;Set the default branch to 'development' and
+                update the settings as shown below.</p>
+              <div style="margin-left: 40px;"><img src="images/github1.png" alt=""
+                  title="Default branch"></div>
+              <p></p>
+              <h3 id="GitServer-Protectthemasterbranch">Protect the master
+                branch</h3>
+              <p>TBA (Not yet implemented &amp; tested in GitHub)</p>
+              <h3 id="GitServer-Configurewebhooks">Configure webhooks</h3>
+              <p>The webhook is an event that is sent from GitHub to the Jenkins
+                server when specified events are detected. For this project, we
+                will be using a webhook when a push is performed to the
+                repository to trigger Jenkins to perform a new build. The
+                Jenkins side of the configuration will be configured to only
+                process push hooks for specific branches - the GitHub side only
+                configures the hooks as on or off.</p>
+              <p>Click on the Webhooks link in the repository Settings, Add
+                webhook, then enter the required details:</p>
+              <ul>
+                <li>Payload URL - This is the publicly accessible URL of the
+                  Jenkins server, with &nbsp; /github-webhook/ &nbsp;as the
+                  target.</li>
+                <li>Content type - Jenkins requires this to be the default
+                  &nbsp;application/x-www-form-urlencoded</li>
+                <li>Secret - No secret is required.</li>
+              </ul>
+              <p></p>
+              <div style="margin-left: 40px;"><a href="images/github2.png"><img
+                    src="file:///home/geoff-l/Documents/Jenkins_webpages/images/github2.png"
+                    alt=""></a></div>
+              <p><br>
+              </p>
+              <p>Click the Add webhook button to complete the configuration.</p>
+              <h3 id="GitServer-AllowJenkinsaccess">Allow Jenkins access</h3>
+              <p>The 'jenkins' user on the Jenkins server needs to be granted
+                read/write access to the repository in order to use it. In
+                GitHub this is performed at a global level, from the Profile
+                Settings page.</p>
+              <ul>
+                <li>Click on the Profile Settings link and then select the 'SSH
+                  and GPG keys' option.</li>
+                <li>Add a new SSH key, and upload the public ssh key for the
+                  jenkins user on the Jenkins server.</li>
+              </ul>
+              <p></p>
+              <div style="margin-left: 40px;"><img src="images/github3.png" alt=""></div>
+              <p><br>
+              </p>
+              <h2 id="GitServer-GitLab"><br>
+              </h2>
+              <h2>GitLab</h2>
+              <h3 id="GitServer-Setthedefaultbranch.1">Set the default branch</h3>
+              <p>Open the 'settings' for the new repository and set the Default
+                Branch to 'development' and update the settings as shown below.</p>
+              <p></p>
+              <div style="margin-left: 40px;"><img src="images/gitlab1.jpg" alt=""></div>
+              <p><br>
+              </p>
+              <p><br>
+              </p>
+              <h3 id="GitServer-Protectthemasterbranch.1">Protect the master
+                branch</h3>
+              <p>Protecting the master branch prevents accidental and/or
+                unauthorised changes being performed directly to that branch.
+                The intent is that only the Jenkins user can merge and push to
+                the master branch, which only occurs after successful validation
+                of the development branch AND passing of the manual approval
+                gate.</p>
+              <p>To do this using GitLab the following setup is required.</p>
+              <p>All users in GitLab must be defined with a role of
+                'Developer'.&nbsp; The Jenkins user is created with a role of
+                'Master' (This is done in a later step in this guide).</p>
+              <p>To set the protection on the repository, navigate to the
+                repository Settings → Repository and then expand the 'Protected
+                Branches' section.</p>
+              <p>By default the 'master' branch should be restricted for merge
+                and push actions to users with the 'Masters' role - if this is
+                not the case, correct it to appear as below.</p>
+              <p></p>
+              <div style="margin-left: 40px;"><img src="images/gitlab2.png" alt=""></div>
+              <p><br>
+              </p>
+              <h3 id="GitServer-Configurewebhooks.1">Configure webhooks</h3>
+              <p>The webhook is an event that is sent from GitLab to the Jenkins
+                server when specified events are detected. For this project, we
+                will be using a webhook when a push is performed to the
+                repository to trigger Jenkins to perform a new build. The
+                Jenkins side of the configuration will be configured to only
+                process push hooks for specific branches - the GitLab side only
+                configures the hooks as on or off.</p>
+              <p>Click on the Integrations link in the repository Settings, then
+                enter the required details:</p>
+              <ul>
+                <li>URL - This is the publicly accessible URL of the Jenkins
+                  server, with &nbsp;<span style="color: rgb(0,0,0);">
+                    /project/&lt;JOB_NAME&gt;</span>&nbsp; as the target.</li>
+                <li><span style="color: rgb(0,0,0);">Secret Token - No secret is
+                    required.</span></li>
+              </ul>
+              <div style="margin-left: 40px;"><img src="images/gitlab3.png" alt=""></div>
+              <p><br>
+              </p>
+              <h3 id="GitServer-AllowJenkinsaccess.1">Allow Jenkins access</h3>
+              <p>The 'jenkins' user on the Jenkins server needs to be granted
+                read/write access to the repository in order to use it.</p>
+              <p>First we need to add the Jenkins user to GitLab.</p>
+              <ul>
+                <li>As a GitLab administrator, navigate to the Admin Area, then
+                  click 'New User'.</li>
+                <li>Create a new 'Regular' user.&nbsp; In our example here the
+                  username is 'jenkins'.</li>
+              </ul>
+              <p>Next we can add the Jenkins user to the repository members list
+                - OR - add the Jenkins user to a Group that has access to the
+                repositories.</p>
+              <ul>
+                <li>Within the repository menu, select the Settings → Members
+                  link.</li>
+                <li><span style="color: #fb1203;">Select the newly created
+                    Jenkins user, and give that user 'Developer' permissions,
+                    with no expiration date.</span></li>
+                <li>Click 'Add to project'</li>
+              </ul>
+              <p></p>
+              <div style="margin-left: 40px;"><img src="images/gitlab4.png" alt=""></div>
+              <p><br>
+              </p>
+              <p>Finally, we need to add the Jenkins users' SSH keys to the
+                profile</p>
+              <ul>
+                <li>Log in to GitLab as the new Jenkins user. Click on the user
+                  avatar and select Settings.</li>
+                <li>Select the 'SSH Keys' tab.</li>
+                <li>Add a new SSH key, and upload the public ssh key for the
+                  jenkins user on the Jenkins server.</li>
+              </ul>
+              <p></p>
+              <div style="margin-left: 40px;"><img src="images/gitlab5.png" alt=""></div>
+              <p><br>
+              </p>
+              <h2 id="GitServer-Bitbucket">Bitbucket</h2>
+              <h3 id="GitServer-Setthedefaultbranch.2">Set the default branch</h3>
+              <p>Open the 'Repository Settings' for the new repository and set
+                the Default Branch to 'development' and update the settings as
+                shown below.</p>
+              <p>&lt;jsoe1&gt;</p>
+              <h3 id="GitServer-Configurewebhooks.2">Configure webhooks</h3>
+              <p>Repository Settings → Hooks</p>
+              <p>Enable 'Bitbucket Server Webhook to Jenkins'</p>
+              <p>&lt;jsoe6&gt;</p>
+              <p>Set the Jenkins URL and Clone URL:</p>
+              <p>&lt;jsoe5&gt;</p>
+              <h3 id="GitServer-AllowJenkinsaccess.2">Allow Jenkins access</h3>
+              <p>The 'jenkins' user on the Jenkins server needs to be granted
+                read/write access to the repository in order to use it.</p>
+              <p>First we need to add the Jenkins user ssh key to
+                the&nbsp;Bitbucket repositories.</p>
+              <ul>
+                <li>Navigate to Reposity Settings → Access Keys, then click 'Add
+                  key'.</li>
+                <li>Paste the Jenkins user SSH publick key into the window, and
+                  set the permission to Read/Write.</li>
+              </ul>
+              <p>&lt;jsoe4&gt;</p>
+              <h3 id="GitServer-Protectthemasterbranch.2">Protect the master
+                branch</h3>
+              <p>Protecting the master branch prevents accidental and/or
+                unauthorised changes being performed directly to that branch.
+                The intent is that only the Jenkins user can merge and push to
+                the master branch, which only occurs after successful validation
+                of the development branch AND passing of the manual approval
+                gate.</p>
+              <p>To do this using BitBucket the following setup is required.</p>
+              <p><span style="color: rgb(0,0,0);">To set the protection on the
+                  repository, navigate to the Repository Settings → Branch
+                  Permissions and then add a new permission.</span></p>
+              <p><span style="color: rgb(0,0,0);">Configure the new permission
+                  to prevent All Changes to the Master branch, except for the
+                  Jenkins user.</span></p>
+              <p><span style="color: rgb(0,0,0);">&lt;jsoe2&gt;</span></p>
+              <p><span style="color: rgb(0,0,0);">The completed configuration
+                  should appear as below:</span></p>
+              <p><span style="color: rgb(0,0,0);">&lt;jose3&gt;</span></p>
+              <p></p>
+              <br>
+              <p></p>
+              <p><br>
+              </p>
+              <p><br>
+              </p>
+              <p></p>
+              <p><a class="external-link" href="https://github.com/RedHatEMEA/soe-ci"
+                  rel="nofollow"></a></p>
+              <p></p>
+              <p></p>
+            </div>
+          </div>
+        </div>
+        <div class="yui-b"><a href="RHEL_SOE_Builder.html">Overview</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Setup</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="git_setup.html">Git
+            Server</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="jenkins_master.html">Jenkins
+            Master</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="jenkins_slave.html">Jenkins
+            Slave</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; Satellite 6</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; vSphere</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Deploying the pipeline</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; Script Approvals</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Configuration</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Building the SOE</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+      </div>
+      <div id="ft">
+        <p><br>
+        </p>
+        <p><br>
+        </p>
+        <p><br>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Jenkins Slave Setup</title>
+    <style type="text/css">/*
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.6.0
+*/
+html{color:#000;background:#FFF;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}del,ins{text-decoration:none;}body{font:13px/1.231 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}body{text-align:center;}#ft{clear:both;}#doc,#doc2,#doc3,#doc4,.yui-t1,.yui-t2,.yui-t3,.yui-t4,.yui-t5,.yui-t6,.yui-t7{margin:auto;text-align:left;width:57.69em;*width:56.25em;min-width:750px;}#doc2{width:73.076em;*width:71.25em;}#doc3{margin:auto 10px;width:auto;}#doc4{width:74.923em;*width:73.05em;}.yui-b{position:relative;}.yui-b{_position:static;}#yui-main .yui-b{position:static;}#yui-main,.yui-g .yui-u .yui-g{width:100%;}{width:100%;}.yui-t1 #yui-main,.yui-t2 #yui-main,.yui-t3 #yui-main{float:right;margin-left:-25em;}.yui-t4 #yui-main,.yui-t5 #yui-main,.yui-t6 #yui-main{float:left;margin-right:-25em;}.yui-t1 .yui-b{float:left;width:12.30769em;*width:12.00em;}.yui-t1 #yui-main .yui-b{margin-left:13.30769em;*margin-left:13.05em;}.yui-t2 .yui-b{float:left;width:13.8461em;*width:13.50em;}.yui-t2 #yui-main .yui-b{margin-left:14.8461em;*margin-left:14.55em;}.yui-t3 .yui-b{float:left;width:23.0769em;*width:22.50em;}.yui-t3 #yui-main .yui-b{margin-left:24.0769em;*margin-left:23.62em;}.yui-t4 .yui-b{float:right;width:13.8456em;*width:13.50em;}.yui-t4 #yui-main .yui-b{margin-right:14.8456em;*margin-right:14.55em;}.yui-t5 .yui-b{float:right;width:18.4615em;*width:18.00em;}.yui-t5 #yui-main .yui-b{margin-right:19.4615em;*margin-right:19.125em;}.yui-t6 .yui-b{float:right;width:23.0769em;*width:22.50em;}.yui-t6 #yui-main .yui-b{margin-right:24.0769em;*margin-right:23.62em;}.yui-t7 #yui-main .yui-b{display:block;margin:0 0 1em 0;}#yui-main .yui-b{float:none;width:auto;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf,.yui-gc .yui-u,.yui-gd .yui-g,.yui-g .yui-gc .yui-u,.yui-ge .yui-u,.yui-ge .yui-g,.yui-gf .yui-g,.yui-gf .yui-u{float:right;}.yui-g div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first,.yui-ge div.first,.yui-gf div.first,.yui-g .yui-gc div.first,.yui-g .yui-ge div.first,.yui-gc div.first div.first{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf{width:49.1%;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{width:32%;margin-left:1.99%;}.yui-gb .yui-u{*margin-left:1.9%;*width:31.9%;}.yui-gc div.first,.yui-gd .yui-u{width:66%;}.yui-gd div.first{width:32%;}.yui-ge div.first,.yui-gf .yui-u{width:74.2%;}.yui-ge .yui-u,.yui-gf div.first{width:24%;}.yui-g .yui-gb div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first{margin-left:0;}.yui-g .yui-g .yui-u,.yui-gb .yui-g .yui-u,.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u,.yui-ge .yui-g .yui-u,.yui-gf .yui-g .yui-u{width:49%;*width:48.1%;*margin-left:0;}.yui-g .yui-g .yui-u{width:48.1%;}.yui-g .yui-gb div.first,.yui-gb .yui-gb div.first{*margin-right:0;*width:32%;_width:31.7%;}.yui-g .yui-gc div.first,.yui-gd .yui-g{width:66%;}.yui-gb .yui-g div.first{*margin-right:4%;_margin-right:1.3%;}.yui-gb .yui-gc div.first,.yui-gb .yui-gd div.first{*margin-right:0;}.yui-gb .yui-gb .yui-u,.yui-gb .yui-gc .yui-u{*margin-left:1.8%;_margin-left:4%;}.yui-g .yui-gb .yui-u{_margin-left:1.0%;}.yui-gb .yui-gd .yui-u{*width:66%;_width:61.2%;}.yui-gb .yui-gd div.first{*width:31%;_width:29.5%;}.yui-g .yui-gc .yui-u,.yui-gb .yui-gc .yui-u{width:32%;_float:right;margin-right:0;_margin-left:0;}.yui-gb .yui-gc div.first{width:66%;*float:left;*margin-left:0;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf .yui-u{margin:0;}.yui-gb .yui-gb .yui-u{_margin-left:.7%;}.yui-gb .yui-g div.first,.yui-gb .yui-gb div.first{*margin-left:0;}.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u{*width:48.1%;*margin-left:0;} .yui-gb .yui-gd div.first{width:32%;}.yui-g .yui-gd div.first{_width:29.9%;}.yui-ge .yui-g{width:24%;}.yui-gf .yui-g{width:74.2%;}.yui-gb .yui-ge div.yui-u,.yui-gb .yui-gf div.yui-u{float:right;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf div.first{float:left;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf div.first{*width:24%;_width:20%;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf .yui-u{*width:73.5%;_width:65.5%;}.yui-ge div.first .yui-gd .yui-u{width:65%;}.yui-ge div.first .yui-gd div.first{width:32%;}#bd:after,.yui-g:after,.yui-gb:after,.yui-gc:after,.yui-gd:after,.yui-ge:after,.yui-gf:after{content:".";display:block;height:0;clear:both;visibility:hidden;}#bd,.yui-g,.yui-gb,.yui-gc,.yui-gd,.yui-ge,.yui-gf{zoom:1;}</style>
+    <style type="text/css">/*
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.6.0
+*/
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;} em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+</style><meta name="author" content="Geoff Gatward">
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+  </head>
+  <body>
+    <div id="doc3" class="yui-t1">
+      <div id="hd">
+        <h1 style="text-align: center;">Jenkins Master Setup</h1>
+      </div>
+      <div id="bd">
+        <div id="yui-main">
+          <div class="yui-b">
+            <div class="yui-g">
+              <h2 id="InstallingJenkins(Master)-BuildOS">Build OS</h2>
+              <p>If using a VM for Jenkins, it needs to have at least 4Gb RAM
+                and 50Gb available in /var/lib/jenkins.</p>
+              <div class="confluence-information-macro confluence-information-macro-information conf-macro output-block"
+                data-hasbody="true" data-macro-name="info" data-macro-id="723de137-8f84-4e8b-8fdb-ee6c15e46f7e"><span
+                  class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon">
+                </span>
+                <div class="confluence-information-macro-body">
+                  <p><span style="color: #8d468d;"><i>We are not covering the
+                        build of a VM for Jenkins here - once the machine is
+                        built with a basic RHEL 7 OS the following applies.</i></span></p>
+                </div>
+              </div>
+              <p>We need the following repositories enabled:</p>
+              <ul>
+                <li>RHEL 7 Server</li>
+                <li>RHEL 7 Server Optional</li>
+                <li>RHEL 7 Satellite Tools</li>
+                <li>EPEL 7</li>
+              </ul>
+              <div class="container" title="Hint: double-click to select code">
+                <div class="line number2 index1 alt1">Assuming that we are
+                  getting content from Red Hat (CDN or Satellite):
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain"><br>
+                      </code></div>
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        subscription-manager repos --enable rhel-server-</code><code
+                        class="java value">7</code><code class="java plain">-rpms
+                        --enable rhel-server-</code><code class="java value">7</code><code
+                        class="java plain">-optional-rpms --enable rhel-</code><code
+                        class="java value">7</code><code class="java plain">-server-satellite-</code><code
+                        class="java value">6.2</code><code class="java plain">-rpms</code></div>
+                  </div>
+                  <p></p>
+                  <p>If we have an internet connection and can access EPEL
+                    directly:</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        rpm --</code><code class="java keyword">import</code> <code
+                        class="java plain">https:</code><code class="java comments">//dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">#
+                        cat &lt;&lt; EOT &gt; /etc/yum.repos.d/epel.repo</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">[jenkins]</code></div>
+                    <div class="line number4 index3 alt1"><code class="java plain">name=EPEL</code></div>
+                    <div class="line number5 index4 alt2"><code class="java plain">baseurl=https:</code><code
+                        class="java comments">//dl.fedoraproject.org/pub/epel/7/x86_64</code></div>
+                    <div class="line number6 index5 alt1"><code class="java plain">gpgcheck=</code><code
+                        class="java value">1</code></div>
+                    <div class="line number7 index6 alt2"><code class="java plain">EOT</code></div>
+                  </div>
+                  <p></p>
+                  <h2 id="InstallingJenkins(Slave)-InstallRequiredPackages">Install
+                    Required Packages</h2>
+                  <p>Jenkins is built on Java, so requires a JRE to be
+                    installed. The default RHEL openjdk 1.8 works well and
+                    should be used.</p>
+                  <p>Install the additional RPM's required for Jenkins and our
+                    specific project use case. Jenkins itself does NOT need to
+                    be installed on the slave, as the master will install the
+                    required Jenkins components.</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">yum
+                        -y install git nc java-</code><code class="java value">1.8</code><code
+                        class="java plain">.</code><code class="java value">0</code><code
+                        class="java plain">-openjdk ansible python2-pyvmomi
+                        python2-pip</code></div>
+                  </div>
+                  <p></p>
+                  <p>This project requires the use of 'pyshpere', which is not
+                    available as an RPM. To install this package we need to use
+                    the pip installer. We are setting the umask here as some
+                    base OS installations may have hardened this.</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">umask
+                        </code><code class="java value">0022</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">pip
+                        install pysphere</code></div>
+                  </div>
+                  <p></p>
+                  <p><span style="color: #8d468d;">In a disconnected environment
+                      without a PyPI mirror, you will need to download the
+                      pysphere source from <a href="https://github.com/argos83/pysphere/archive/master.zip"
+                        class="external-link" rel="nofollow">https://github.com/argos83/pysphere/archive/master.zip</a>
+                      and install it manually</span></p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><span style="color: #8d468d;"><code
+                          class="java plain">unzip pysphere.zip</code></span></div>
+                    <div class="line number2 index1 alt1"><span style="color: #8d468d;"><code
+                          class="java plain">cd pysphere-master</code></span></div>
+                    <div class="line number3 index2 alt2"><span style="color: #8d468d;"><code
+                          class="java plain">python setup.py install</code></span></div>
+                  </div>
+                  <p></p>
+                  <h2 id="InstallingJenkins(Slave)-ConfigureJenkinsSlave(OS)">Configure
+                    Jenkins Slave (OS)</h2>
+                  <p>Add the jenkins user, and set an initial password.</p>
+                  <code class="java plain"></code>
+                  <p></p>
+                  <p></p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">useradd
+                        jenkins -d /var/lib/jenkins</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">passwd
+                        jenkins</code></div>
+                  </div>
+                  <p></p>
+                  <p>Set the selinux contexts of the jenkins home directory, as
+                    this is outside the standard /home structure</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">semanage
+                        fcontext -a -t ssh_home_t </code><code class="java string">"/var/lib/jenkins/.ssh(.*)?"</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">restorecon
+                        -Rv /var/lib/jenkins/.ssh</code></div>
+                  </div>
+                  <p></p>
+                  <p>If using access.conf, allow the jenkins user access to SSH
+                    into the host</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">sed
+                        -i </code><code class="java string">'/@role-unix-support/a+
+                        : jenkins : ALL'</code> <code class="java plain">/etc/security/access.conf</code></div>
+                  </div>
+                  <p></p>
+                  <p>Copy the SSH keys for the jenkins user from the master to
+                    the slave</p>
+                  <span class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon"></span><span
+                    style="color: #8d468d;">Because the jenkins slaves will be
+                    the hosts logging into Satellite/Git, we will copy the keys
+                    from the Jenkins master to each slave. This allows us to
+                    easily (re)deploy slaves without needing to add many SSH
+                    keys to the Git repos and SSH access lists.</span>
+                  <p></p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">mkdir
+                        -p /var/lib/jenkins/.ssh</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">cat
+                        &lt;&lt; EOF &gt; /var/lib/jenkins/.ssh/id_rsa</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">-----BEGIN
+                        RSA PRIVATE KEY-----</code></div>
+                    <div class="line number4 index3 alt1"><code class="java plain">&lt;key
+                        here&gt;</code></div>
+                    <div class="line number5 index4 alt2"><code class="java plain">-----END
+                        OF RSA PRIVATE KEY-----</code></div>
+                    <div class="line number6 index5 alt1"><code class="java plain">EOF</code></div>
+                    <div class="line number7 index6 alt2">&nbsp;</div>
+                    <div class="line number8 index7 alt1"><code class="java plain">cat
+                        &lt;&lt; EOF &gt; /var/lib/jenkins/.ssh/id_rsa.pub</code></div>
+                    <div class="line number9 index8 alt2"><code class="java plain">ssh-rsa
+                        AAAAA............</code></div>
+                    <div class="line number10 index9 alt1"><code class="java plain">EOF</code></div>
+                    <div class="line number11 index10 alt2">&nbsp;</div>
+                    <div class="line number12 index11 alt1"><code class="java plain">#
+                        Allow password-less SSH </code><code class="java keyword">for</code>
+                      <code class="java plain">jenkins</code></div>
+                    <div class="line number13 index12 alt2"><code class="java plain">cat
+                        &lt;&lt; EOF &gt;&gt;
+                        /var/lib/jenkins/.ssh/authorized_keys</code></div>
+                    <div class="line number14 index13 alt1"><code class="java plain">ssh-rsa
+                        AAAAA............</code></div>
+                    <div class="line number15 index14 alt2"><code class="java plain">EOF</code></div>
+                    <div class="line number16 index15 alt1">&nbsp;</div>
+                    <div class="line number17 index16 alt2"><code class="java plain">#
+                        Add </code><code class="java keyword">public</code> <code
+                        class="java plain">SSH key </code><code class="java keyword">for</code>
+                      <code class="java plain">Git server</code></div>
+                    <div class="line number18 index17 alt1"><code class="java plain">cat
+                        &lt;&lt; EOF &gt;&gt; /var/lib/jenkins/.ssh/known_hosts</code></div>
+                    <div class="line number19 index18 alt2"><code class="java plain">ssh-rsa
+                        AAAAA............</code></div>
+                    <div class="line number20 index19 alt1"><code class="java plain">EOF</code></div>
+                    <div class="line number21 index20 alt2">&nbsp;</div>
+                    <div class="line number22 index21 alt1"><code class="java plain">chown
+                        -R jenkins:jenkins /var/lib/jenkins/.ssh</code></div>
+                    <div class="line number23 index22 alt2"><code class="java plain">chmod
+                        </code><code class="java value">0700</code> <code class="java plain">/var/lib/jenkins/.ssh</code></div>
+                    <div class="line number24 index23 alt1"><code class="java plain">chmod
+                        </code><code class="java value">0600</code> <code class="java plain">/var/lib/jenkins/.ssh/*</code></div>
+                    <div class="line number25 index24 alt2"><code class="java plain">chmod
+                        </code><code class="java value">0644</code> <code class="java plain">/var/lib/jenkins/.ssh/known_hosts</code></div>
+                  </div>
+                  <p></p>
+                  <p>Verify that the Jenkins user can SSH from the Master to the
+                    slave without password, and that the jenkins user can
+                    perform a git clone action from the git repository server.</p>
+                  <h2 id="InstallingJenkins(Slave)-ConfigureJenkinsSlave(Application)">Configure
+                    Jenkins Slave (Application)</h2>
+                  <p>Now that the OS and user accounts are configured, we can
+                    set up the Jenkins application.</p>
+                  <ul>
+                    <li>Login to the master WebUI, and click on Manage Jenkins →
+                      Manage Nodes</li>
+                    <li>Click on 'New Node'</li>
+                    <li>Enter a short descriptive node name, and select
+                      'Permanent Agent', then click OK</li>
+                  </ul>
+                  <p></p>
+                  <div style="margin-left: 40px;"><img src="images/jenkins_slave1.png"
+                      alt=""></div>
+                  <ul>
+                    <li>Enter a description for this slave</li>
+                    <li>Enter the number of executors for this slave (2x CPU
+                      cores)</li>
+                    <li>Set the remainder of the form as shown:</li>
+                  </ul>
+                  <p></p>
+                  <div style="margin-left: 40px;"><img src="images/jenkins_slave2.png"
+                      alt=""></div>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                </div>
+              </div>
+              <p></p>
+              <p></p>
+              <p><a class="external-link" href="https://github.com/RedHatEMEA/soe-ci"
+                  rel="nofollow"></a></p>
+              <p></p>
+              <p></p>
+            </div>
+          </div>
+        </div>
+        <div class="yui-b"><a href="RHEL_SOE_Builder.html">Overview</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Setup</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="git_setup.html">Git
+            Server</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="jenkins_master.html">Jenkins
+            Master</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="jenkins_slave.html">Jenkins
+            Slave</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; Satellite 6</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; vSphere</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Deploying the pipeline</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; Script Approvals</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Configuration</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Building the SOE</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+      </div>
+      <div id="ft">
+        <p><br>
+        </p>
+        <p><br>
+        </p>
+        <p><br>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
