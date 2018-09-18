@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Satellite Setup</title>
+    <style type="text/css">/*
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.6.0
+*/
+html{color:#000;background:#FFF;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}del,ins{text-decoration:none;}body{font:13px/1.231 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}body{text-align:center;}#ft{clear:both;}#doc,#doc2,#doc3,#doc4,.yui-t1,.yui-t2,.yui-t3,.yui-t4,.yui-t5,.yui-t6,.yui-t7{margin:auto;text-align:left;width:57.69em;*width:56.25em;min-width:750px;}#doc2{width:73.076em;*width:71.25em;}#doc3{margin:auto 10px;width:auto;}#doc4{width:74.923em;*width:73.05em;}.yui-b{position:relative;}.yui-b{_position:static;}#yui-main .yui-b{position:static;}#yui-main,.yui-g .yui-u .yui-g{width:100%;}{width:100%;}.yui-t1 #yui-main,.yui-t2 #yui-main,.yui-t3 #yui-main{float:right;margin-left:-25em;}.yui-t4 #yui-main,.yui-t5 #yui-main,.yui-t6 #yui-main{float:left;margin-right:-25em;}.yui-t1 .yui-b{float:left;width:12.30769em;*width:12.00em;}.yui-t1 #yui-main .yui-b{margin-left:13.30769em;*margin-left:13.05em;}.yui-t2 .yui-b{float:left;width:13.8461em;*width:13.50em;}.yui-t2 #yui-main .yui-b{margin-left:14.8461em;*margin-left:14.55em;}.yui-t3 .yui-b{float:left;width:23.0769em;*width:22.50em;}.yui-t3 #yui-main .yui-b{margin-left:24.0769em;*margin-left:23.62em;}.yui-t4 .yui-b{float:right;width:13.8456em;*width:13.50em;}.yui-t4 #yui-main .yui-b{margin-right:14.8456em;*margin-right:14.55em;}.yui-t5 .yui-b{float:right;width:18.4615em;*width:18.00em;}.yui-t5 #yui-main .yui-b{margin-right:19.4615em;*margin-right:19.125em;}.yui-t6 .yui-b{float:right;width:23.0769em;*width:22.50em;}.yui-t6 #yui-main .yui-b{margin-right:24.0769em;*margin-right:23.62em;}.yui-t7 #yui-main .yui-b{display:block;margin:0 0 1em 0;}#yui-main .yui-b{float:none;width:auto;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf,.yui-gc .yui-u,.yui-gd .yui-g,.yui-g .yui-gc .yui-u,.yui-ge .yui-u,.yui-ge .yui-g,.yui-gf .yui-g,.yui-gf .yui-u{float:right;}.yui-g div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first,.yui-ge div.first,.yui-gf div.first,.yui-g .yui-gc div.first,.yui-g .yui-ge div.first,.yui-gc div.first div.first{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf{width:49.1%;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{width:32%;margin-left:1.99%;}.yui-gb .yui-u{*margin-left:1.9%;*width:31.9%;}.yui-gc div.first,.yui-gd .yui-u{width:66%;}.yui-gd div.first{width:32%;}.yui-ge div.first,.yui-gf .yui-u{width:74.2%;}.yui-ge .yui-u,.yui-gf div.first{width:24%;}.yui-g .yui-gb div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first{margin-left:0;}.yui-g .yui-g .yui-u,.yui-gb .yui-g .yui-u,.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u,.yui-ge .yui-g .yui-u,.yui-gf .yui-g .yui-u{width:49%;*width:48.1%;*margin-left:0;}.yui-g .yui-g .yui-u{width:48.1%;}.yui-g .yui-gb div.first,.yui-gb .yui-gb div.first{*margin-right:0;*width:32%;_width:31.7%;}.yui-g .yui-gc div.first,.yui-gd .yui-g{width:66%;}.yui-gb .yui-g div.first{*margin-right:4%;_margin-right:1.3%;}.yui-gb .yui-gc div.first,.yui-gb .yui-gd div.first{*margin-right:0;}.yui-gb .yui-gb .yui-u,.yui-gb .yui-gc .yui-u{*margin-left:1.8%;_margin-left:4%;}.yui-g .yui-gb .yui-u{_margin-left:1.0%;}.yui-gb .yui-gd .yui-u{*width:66%;_width:61.2%;}.yui-gb .yui-gd div.first{*width:31%;_width:29.5%;}.yui-g .yui-gc .yui-u,.yui-gb .yui-gc .yui-u{width:32%;_float:right;margin-right:0;_margin-left:0;}.yui-gb .yui-gc div.first{width:66%;*float:left;*margin-left:0;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf .yui-u{margin:0;}.yui-gb .yui-gb .yui-u{_margin-left:.7%;}.yui-gb .yui-g div.first,.yui-gb .yui-gb div.first{*margin-left:0;}.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u{*width:48.1%;*margin-left:0;} .yui-gb .yui-gd div.first{width:32%;}.yui-g .yui-gd div.first{_width:29.9%;}.yui-ge .yui-g{width:24%;}.yui-gf .yui-g{width:74.2%;}.yui-gb .yui-ge div.yui-u,.yui-gb .yui-gf div.yui-u{float:right;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf div.first{float:left;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf div.first{*width:24%;_width:20%;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf .yui-u{*width:73.5%;_width:65.5%;}.yui-ge div.first .yui-gd .yui-u{width:65%;}.yui-ge div.first .yui-gd div.first{width:32%;}#bd:after,.yui-g:after,.yui-gb:after,.yui-gc:after,.yui-gd:after,.yui-ge:after,.yui-gf:after{content:".";display:block;height:0;clear:both;visibility:hidden;}#bd,.yui-g,.yui-gb,.yui-gc,.yui-gd,.yui-ge,.yui-gf{zoom:1;}</style>
+    <style type="text/css">/*
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.6.0
+*/
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;} em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+</style><meta name="author" content="Geoff Gatward">
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+  </head>
+  <body>
+    <div id="doc3" class="yui-t1">
+      <div id="hd">
+        <h1 style="text-align: center;">Satellite 6 Setup</h1>
+      </div>
+      <div id="bd">
+        <div id="yui-main">
+          <div class="yui-b">
+            <div class="yui-g">
+              <p>This project uses Satellite 6 to build RHEL hosts in virtual
+                environments. The following requirements exist for this project</p>
+              <h2 id="Satellite6-SupportedSatelliteVersions">Supported Satellite
+                Versions</h2>
+              <p>This project has been tested against the following Satellite
+                releases.</p>
+              <ul>
+                <li>Satellite 6.2.z</li>
+              </ul>
+              <p><br>
+              </p>
+              <h2 id="Satellite6-ComputeResources">Compute Resources</h2>
+              <p>The Jenkins pipeline uses Satellite to build new RHEL hosts,
+                and requires the ability to reboot these hosts during the build
+                process.</p>
+              <p>To achieve this, Satellite 6 uses Compute Resources to interact
+                with the hosting environment and control the build and reboot of
+                the VMs used by the pipeline. The pipeline has been tested using
+                the following Compute Resource integrations:</p>
+              <ul>
+                <li>vSphere 5.5</li>
+                <li>RHEV 3.5, 3.6</li>
+                <li>Libvirt</li>
+              </ul>
+              <p>Setting up compute resources in Satellite 6 is not covered
+                within this project.</p>
+              <h3 id="Satellite6-AlternativevSphereintegration">Alternative
+                vSphere integration</h3>
+              <p>The Jenkins pipeline has been developed around a customer that
+                does not allow Satellite 6 &lt;&gt; vSphere integration, but has
+                allowed Jenkins limited access via vCenter to reboot the test
+                VMs.</p>
+              <p>To accomodate this, a configuration option within the pipeline
+                can instruct Jenkins to communicate directly with vCenter for
+                the required commands. This is detailed in the Configuration
+                section.</p>
+              <h2 id="Satellite6-Requiredrepositories">Required repositories</h2>
+              <p>The project was developed to build both RHEL 6 and RHEL 7
+                servers. The repositories required will depend on the build
+                requirements for the customer, but typically will be:</p>
+              <ul>
+                <li>Server Kickstart,</li>
+                <li>Server RPMs,</li>
+                <li>Extra RPMs,</li>
+                <li>Optional RPMs,</li>
+                <li>Common RPMs Server</li>
+                <li>Satellite 6.x Tools</li>
+                <li>EPEL</li>
+              </ul>
+              <p><br>
+              </p>
+              <h2 id="Satellite6-RequiredHostGroups">Required Host Groups</h2>
+              <p>Dedicated Host Groups will need to be configured on the
+                Satellite server for the Jenkins-managed hosts. &nbsp;One Host
+                Group needs to be created for each RHEL version being tested.
+                During development the Host Groups created were as follows:</p>
+              <ul>
+                <li>RHEL6-SOE &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  &nbsp; &nbsp;- RHEL6 PXE kickstart</li>
+                <li>RHEL7-SOE &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  &nbsp; &nbsp;- RHEL7 PXE kickstart</li>
+                <li>RHEL6-SOE-Template &nbsp;- RHEL6 Gold Image - PXE bootstrap
+                  &nbsp;(VMware only)</li>
+                <li>RHEL7-SOE-Template &nbsp;- RHEL7 Gold Image - PXE bootstrap
+                  &nbsp;(VMware only)</li>
+                <li>RHEL6-IMAGE &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  &nbsp;- RHEL6 VM deployed from Gold Image &nbsp;(VMware only)</li>
+                <li>RHEL7-IMAGE &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  &nbsp;- RHEL7 VM deployed from Gold Image &nbsp;(VMware only)</li>
+              </ul>
+              <p>These Host Groups require a known root password to be set
+                within them - this is used by Jenkins for the functional testing
+                of the hosts during the pipeline.</p>
+              <h2 id="Satellite6-InitialProvisioningofServers">Initial
+                Provisioning of Servers</h2>
+              <p>All hosts that will be used by the Jenkins pipeline need to be
+                initially created within Satellite, and must also exist in the
+                hosting environment.</p>
+              <p>The VMs must be configured to boot from network before local
+                hard drive - typically this is a BIOS setting that will need to
+                be updated within the VM container. This ensures that when
+                Jenkins initiates a reboot of the VM, it will perform a new PXE
+                boot and re-installation of the OS.</p>
+              <p><br>
+              </p>
+              <h2 id="Satellite6-r10kinstallationandsetup">r10k installation and
+                setup</h2>
+              <p>The Jenkins project uses r10k to deploy puppet modules to the
+                Satellite server. For this to take place we need to create a
+                non-privileged generic or service account on the Satellite and
+                any Capsules. This account will be used to deploy the puppet
+                modules. The default user in the project is &nbsp;'svc-r10k'</p>
+              <h3 id="Satellite6-Installr10k">Install r10k</h3>
+              <p>r10k is a ruby gem that needs to be installed on the Satellite
+                server for this project to make use of.</p>
+              <p>If the Satellite server cannot reach the Internet gem mirrors,
+                a local gem mirror can be set up. In this case, the default gem
+                location can be changed to this mirror:</p>
+              <p></p>
+              <div class="container" title="Hint: double-click to select code">
+                <div class="line number2 index1 alt1" style="margin-left: 40px;">#</div>
+                <div class="line number2 index1 alt1">
+                  <div style="margin-left: 40px;"><br>
+                  </div>
+                  <p style="margin-left: 40px;"><code class="java plain"># gem
+                      install r10k</code></p>
+                  <p><br>
+                    If no gem mirror is accessible at all, the r10k gem and its
+                    dependencies will need to be manually downloaded and copied
+                    to the Satellite server. Once the individual gems have been
+                    copied they can be installed:</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp;&nbsp; <code
+                        class="java value">5632</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">colored-</code><code class="java value">1.2</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">23552</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">cri-</code><code class="java value">2.6</code><code
+                        class="java plain">.</code><code class="java value">1</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">35840</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">faraday-</code><code class="java value">0.9</code><code
+                        class="java plain">.</code><code class="java value">2</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number4 index3 alt1"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">16384</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">faraday_middleware-</code><code class="java value">0.10</code><code
+                        class="java plain">.</code><code class="java value">0</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number5 index4 alt2"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">26112</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">fast_gettext-</code><code class="java value">1.1</code><code
+                        class="java plain">.</code><code class="java value">0</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number6 index5 alt1"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp; <code class="java value">283648</code>
+                      <code class="java plain">Sep </code><code class="java value">21</code>&nbsp;
+                      <code class="java value">2016</code> <code class="java plain">gettext-</code><code
+                        class="java value">3.2</code><code class="java plain">.</code><code
+                        class="java value">2</code><code class="java plain">.gem</code></div>
+                    <div class="line number7 index6 alt2"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">10240</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">gettext-setup-</code><code class="java value">0.7</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number8 index7 alt1"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp; <code class="java value">103424</code>
+                      <code class="java plain">Sep </code><code class="java value">21</code>&nbsp;
+                      <code class="java value">2016</code> <code class="java plain">locale-</code><code
+                        class="java value">2.1</code><code class="java plain">.</code><code
+                        class="java value">2</code><code class="java plain">.gem</code></div>
+                    <div class="line number9 index8 alt2"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp; <code class="java value">118272</code>
+                      <code class="java plain">Sep </code><code class="java value">21</code>&nbsp;
+                      <code class="java value">2016</code> <code class="java plain">log4r-</code><code
+                        class="java value">1.1</code><code class="java plain">.</code><code
+                        class="java value">10</code><code class="java plain">.gem</code></div>
+                    <div class="line number10 index9 alt1"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">23552</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">minitar-</code><code class="java value">0.5</code><code
+                        class="java plain">.</code><code class="java value">4</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number11 index10 alt2"><code class="java plain">-rw-r--r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">26112</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">multi_json-</code><code class="java value">1.12</code><code
+                        class="java plain">.</code><code class="java value">1</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number12 index11 alt1"><code class="java plain">-rw-r--r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">11264</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">multipart-post-</code><code class="java value">2.0</code><code
+                        class="java plain">.</code><code class="java value">0</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number13 index12 alt2"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp; <code class="java value">771072</code>
+                      <code class="java plain">Sep </code><code class="java value">21</code>&nbsp;
+                      <code class="java value">2016</code> <code class="java plain">puppet_forge-</code><code
+                        class="java value">2.2</code><code class="java plain">.</code><code
+                        class="java value">2</code><code class="java plain">.gem</code></div>
+                    <div class="line number14 index13 alt1"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp; <code class="java value">186368</code>
+                      <code class="java plain">Sep </code><code class="java value">21</code>&nbsp;
+                      <code class="java value">2016</code> <code class="java plain">r10k-</code><code
+                        class="java value">2.4</code><code class="java plain">.</code><code
+                        class="java value">3</code><code class="java plain">.gem</code></div>
+                    <div class="line number15 index14 alt2"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">26624</code> <code class="java plain">Sep
+                        </code><code class="java value">21</code>&nbsp; <code class="java value">2016</code>
+                      <code class="java plain">semantic_puppet-</code><code class="java value">0.1</code><code
+                        class="java plain">.</code><code class="java value">4</code><code
+                        class="java plain">.gem</code></div>
+                    <div class="line number16 index15 alt1"><code class="java plain">-rw-rw-r--.
+                        </code><code class="java value">1</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">1146800017</code>&nbsp;&nbsp; <code
+                        class="java value">1146800017</code>&nbsp; <code class="java value">138752</code>
+                      <code class="java plain">Sep </code><code class="java value">21</code>&nbsp;
+                      <code class="java value">2016</code> <code class="java plain">text-</code><code
+                        class="java value">1.3</code><code class="java plain">.</code><code
+                        class="java value">1</code><code class="java plain">.gem</code></div>
+                  </div>
+                  <p> </p>
+                  <p><br>
+                  </p>
+                  <h3 id="Satellite6-r10kuser">r10k user</h3>
+                  <p>Create the r10k user on the Satellite and each Capsule</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        useradd svc-r10k -d /var/lib/r10k</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">#
+                        passwd svc-r10k</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">#
+                        semanage fcontext -a -t user_home_dir_t </code><code class="java string">"/var/lib/r10k"</code></div>
+                    <div class="line number4 index3 alt1"><code class="java plain">#
+                        semanage fcontext -a -t ssh_home_t </code><code class="java string">"/var/lib/r10k/.ssh"</code></div>
+                    <div class="line number5 index4 alt2"><code class="java plain">#
+                        restorecon -Rv /var/lib/r10k/</code></div>
+                    <div class="line number6 index5 alt1"><code class="java plain">#
+                        chage -M </code><code class="java value">99999</code> <code
+                        class="java plain">svc-r10k</code></div>
+                    <div class="line number7 index6 alt2"><code class="java plain">#
+                        usermod -a -G apache svc-r10k</code></div>
+                  </div>
+                  <p></p>
+                  <p> </p>
+                  <p>The r10k user will need to run hammer commands, so will
+                    need to have a login to the Satellite application, and a
+                    hammer configuration to allow commands to be run.</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        hammer user create --login svc-r10k --firstname r10k
+                        --lastname User --password=</code><code class="java string">'r10k_Passw0rd'</code>
+                      <code class="java plain">\</code></div>
+                    <div class="line number2 index1 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">--mail no-reply</code><code class="java color1">@example</code><code
+                        class="java plain">.org --auth-source-id </code><code class="java value">1</code>
+                      <code class="java plain">--organization-ids </code><code
+                        class="java value">1</code> <code class="java plain">--</code><code
+                        class="java keyword">default</code><code class="java plain">-organization-id
+                        </code><code class="java value">1</code> <code class="java plain">\</code></div>
+                    <div class="line number3 index2 alt2"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">--admin </code><code class="java keyword">true</code></div>
+                    <div class="line number4 index3 alt1">&nbsp;</div>
+                    <div class="line number5 index4 alt2"><code class="java plain">#
+                        mkdir /var/lib/r10k/.hammer</code></div>
+                    <div class="line number6 index5 alt1"><code class="java plain">#
+                        cat &lt;&lt; EOT &gt;
+                        /var/lib/r10k/.hammer/cli_config.yml</code></div>
+                    <div class="line number7 index6 alt2"><code class="java plain">:foreman:</code></div>
+                    <div class="line number8 index7 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">:host: </code><code class="java string">'<a
+                          href="https://localhost/%27">https://localhost/'</a></code></div>
+                    <div class="line number9 index8 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">:username: </code><code class="java string">'svc-r10k'</code></div>
+                    <div class="line number10 index9 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">:password: </code><code class="java string">'r10k_Passw0rd'</code></div>
+                    <div class="line number11 index10 alt2"><code class="java plain">EOT</code></div>
+                    <div class="line number12 index11 alt1"><code class="java plain">#
+                        chown -R svc-r10k:svc-r10k /var/lib/r10k/.hammer/</code></div>
+                  </div>
+                  <p> </p>
+                  <p>Next, the r10k user will need to have password-less SSH
+                    access between the Satellite and each Capsule in order to
+                    copy the puppet modules.</p>
+                  <p>Switch to the svc-r10k user on the Satellite, generate an
+                    SSH key and copy it to all capsules.</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        su - svc-r10k</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">$
+                        ssh-keygen -t rsa</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">$
+                        ssh-copy-id &lt;capsule&gt;</code></div>
+                  </div>
+                  <p></p>
+                  <p> </p>
+                  <p>Verify that the svc-r10k user can ssh to each capsule
+                    without a password.</p>
+                  <p>Finally, on the Jenkins server, copy the SSH key to the
+                    Satellite server as the svc-r10k user.</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        su - jenkins</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">$
+                        ssh-copy-id svc-r10k@&lt;satellite&gt;</code></div>
+                  </div>
+                  <p></p>
+                  <p>Verify that the jenkins user can ssh from the Jenkins
+                    server to the Satellite as the svc-r10k user without a
+                    password.</p>
+                  <h3 id="Satellite6-r10kenvironment">r10k environment</h3>
+                  <p>Create an r10k environment directory on the Satellite and
+                    each capsule. This environment path is OUTSIDE the default
+                    /etc/puppet/environments location, as r10k will REMOVE any
+                    environments it finds but does not manage. In this case, our
+                    SOE will have its own environment path, allowing other users
+                    and projects to also use the r10k functionality for
+                    additional environments if required.</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        mkdir -p /etc/puppet/r10k/environments/SOE</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">#
+                        chown -R svc-r10k:apache /etc/puppet/r10k</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">#
+                        chmod -R </code><code class="java value">2775</code> <code
+                        class="java plain">/etc/puppet/r10k</code></div>
+                  </div>
+                  <p></p>
+                  <p></p>
+                  <h3 id="Satellite6-r10kconfiguration">r10k configuration</h3>
+                  <p>r10k uses a master configuration file to control what is
+                    deployed. For the SOE, we use a single config file that
+                    defines all of the Git branches being built.</p>
+                  <p>This file should be created as <strong>/etc/puppet/r10k/r10k_SOE.yaml</strong>
+                    and should contain the following:</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">---</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">:cachedir:
+                        /var/lib/r10k/r10k-cache</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">:sources:</code></div>
+                    <div class="line number4 index3 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">:RHEL_SOE:</code></div>
+                    <div class="line number5 index4 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">remote: https:</code><code class="java comments">//github.com/ggatward/RHEL-Builder</code></div>
+                    <div class="line number6 index5 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">basedir:
+                        /etc/puppet/r10k/environments/SOE</code></div>
+                    <div class="line number7 index6 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">prefix: </code><code class="java keyword">true</code></div>
+                    <div class="line number8 index7 alt1"><code class="java plain">forge:</code></div>
+                    <div class="line number9 index8 alt2"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">baseurl: </code><code class="java string">'<a
+                          href="https://forgeapi.puppetlabs.com%27">https://forgeapi.puppetlabs.com'</a></code></div>
+                    <div class="line number10 index9 alt1"><code class="java plain">postrun:
+                        [</code><code class="java string">'/bin/bash'</code><code
+                        class="java plain">, </code><code class="java string">'/etc/puppet/r10k/post_deploy.sh'</code><code
+                        class="java plain">, </code><code class="java string">'/etc/puppet/r10k/environments/SOE'</code><code
+                        class="java plain">]</code></div>
+                  </div>
+                  <p></p>
+                  <p></p>
+                  <p>In this file, we define the sources for deployment, in this
+                    case being a project named RHEL_SOE. For that project, we
+                    define the Git repository containing the Puppetfile (Puppet
+                    module definitions) - in this case it is contained within
+                    the main project. We also need to define the base directory
+                    on Satellite that the puppet environment will be deployed to
+                    - this is the directory we created earlier.</p>
+                  <p>The 'forge' section defines where modules from Puppet Forge
+                    can be located - if the customer environment is not able to
+                    access the real Puppet Forge site, an offline mirror that
+                    provides the required API can be set up, and the URL of this
+                    mirror defined here.</p>
+                  <p>The 'postrun' section defines the script that will be
+                    executed once r10k has deployed the puppet modules - in this
+                    case the script will use rsync to copy the puppet
+                    environment to all Capsules and also link the r10k
+                    environment into the main puppet environment so that it is
+                    visible to Satellite. It will also import the environment
+                    into Satellite using hammer.</p>
+                  <p>The following script is included in the Jenkins project,
+                    but must be copied onto the Satellite server before the
+                    project can be run. &nbsp;The script should exist in &nbsp;<strong>/etc/puppet/r10k/post_deploy.sh</strong></p>
+                  <p></p>
+                  <p><span style="color: #9e1795;"><i>For now, the
+                        PUPPET_LOCATIONS and Organizations in the script are
+                        hard-coded - be sure to set them appropriately</i></span></p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">ENVPATH=$</code><code
+                        class="java value">1</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">logger
+                        -t r10k </code><code class="java string">"Deploying
+                        $ENVPATH"</code></div>
+                    <div class="line number3 index2 alt2"><code class="java keyword">for</code>
+                      <code class="java plain">i in `ls $ENVPATH`; </code><code
+                        class="java keyword">do</code></div>
+                    <div class="line number4 index3 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">ln -sd $ENVPATH/$i
+                        /etc/puppet/environments/$i</code></div>
+                    <div class="line number5 index4 alt2"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">unlink $ENVPATH/$i/$i</code></div>
+                    <div class="line number6 index5 alt1">&nbsp;</div>
+                    <div class="line number7 index6 alt2"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain"># Create/Update puppet environments
+                        in Satellite</code></div>
+                    <div class="line number8 index7 alt1"><code class="java plain">#&nbsp;
+                        PUPPET_LOCATIONS=HOME,REMOTE,SITE3</code></div>
+                    <div class="line number9 index8 alt2"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">PUPPET_LOCATIONS=HOME</code></div>
+                    <div class="line number10 index9 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java keyword">if</code> <code class="java plain">[
+                        $(hammer environment list | awk </code><code class="java string">'/^[0-9]/
+                        { print $3 }'</code> <code class="java plain">| grep -c
+                        $i) -eq </code><code class="java value">0</code> <code
+                        class="java plain">]; then</code></div>
+                    <div class="line number11 index10 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">hammer environment create --name $i
+                        --locations ${PUPPET_LOCATIONS} --organizations DIG</code></div>
+                    <div class="line number12 index11 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java keyword">else</code></div>
+                    <div class="line number13 index12 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">hammer environment update --name $i
+                        --locations ${PUPPET_LOCATIONS} --organizations DIG</code></div>
+                    <div class="line number14 index13 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">fi</code></div>
+                    <div class="line number15 index14 alt2">&nbsp;</div>
+                    <div class="line number16 index15 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain"># Import the puppet classes</code></div>
+                    <div class="line number17 index16 alt2"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">hammer proxy </code><code class="java keyword">import</code><code
+                        class="java plain">-classes --id </code><code class="java value">1</code>
+                      <code class="java plain">--environment $i</code></div>
+                    <div class="line number18 index17 alt1"><code class="java plain">done</code></div>
+                    <div class="line number19 index18 alt2">&nbsp;</div>
+                    <div class="line number20 index19 alt1"><code class="java plain">#
+                        rsync to capusles</code></div>
+                    <div class="line number21 index20 alt2"><code class="java keyword">for</code>
+                      <code class="java plain">capsule in $(hammer --csv capsule
+                        list | grep -iv Id | cut -f2 -d,); </code><code class="java keyword">do</code></div>
+                    <div class="line number22 index21 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">logger -t r10k </code><code class="java string">"Deploying
+                        puppet modules for $ENVPATH to $capsule"</code></div>
+                    <div class="line number23 index22 alt2"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">rsync -avz --delete $ENVPATH/*
+                        $capsule:$ENVPATH</code></div>
+                    <div class="line number24 index23 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">ssh -q $capsule </code><code class="java string">"for
+                        i in \$(ls ${ENVPATH}); do ln -sf ${ENVPATH}/\$i
+                        /etc/puppet/environments/\$i; done"</code></div>
+                    <div class="line number25 index24 alt2"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">ssh -q $capsule </code><code class="java string">"for
+                        i in \$(ls ${ENVPATH}); do unlink ${ENVPATH}/\$i/\$i;
+                        done"</code></div>
+                    <div class="line number26 index25 alt1"><code class="java plain">done</code></div>
+                  </div>
+                  <p></p>
+                  <h2 id="Satellite6-Jenkinsuser">Jenkins user</h2>
+                  <div class="confluence-information-macro-body">
+                    <p><span style="color: #9e1795;"><i>Currently, a Jenkins
+                          user needs to be created on the Satellite (but not
+                          Capsules) in order for the Jenkins pipeline to run
+                          hammer commands on the Satellite server. &nbsp;</i></span></p>
+                    <p><span style="color: #9e1795;"><i>This functionality will
+                          be replaced by API calls in a future release of this
+                          project</i></span></p>
+                  </div>
+                  <p></p>
+                  <p></p>
+                  <p> </p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        useradd svc-jenkins -d /var/lib/jenkins</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">#
+                        passwd svc-jenkins</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">#
+                        semanage fcontext -a -t user_home_dir_t </code><code class="java string">"/var/lib/jenkins"</code></div>
+                    <div class="line number4 index3 alt1"><code class="java plain">#
+                        semanage fcontext -a -t ssh_home_t </code><code class="java string">"/var/lib/jenkins/.ssh"</code></div>
+                    <div class="line number5 index4 alt2"><code class="java plain">#
+                        restorecon -Rv /var/lib/jenkins</code></div>
+                    <div class="line number6 index5 alt1"><code class="java plain">#
+                        chage -M </code><code class="java value">99999</code> <code
+                        class="java plain">svc-jenkins</code></div>
+                    <div class="line number7 index6 alt2"><code class="java plain">#
+                        usermod -a -G apache svc-jenkins</code></div>
+                  </div>
+                  <p> </p>
+                  <p>The jenkins user will need to run hammer commands, so will
+                    need to have a login to the Satellite application, and a
+                    hammer configuration to allow commands to be run. </p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        hammer user create --login svc-jenkins --firstname
+                        Jenkins --lastname User --password=</code><code class="java string">'jks_Passw0rd'</code>
+                      <code class="java plain">\</code></div>
+                    <div class="line number2 index1 alt1"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">--mail no-reply</code><code class="java color1">@example</code><code
+                        class="java plain">.org --auth-source-id </code><code class="java value">1</code>
+                      <code class="java plain">--organization-ids </code><code
+                        class="java value">1</code> <code class="java plain">--</code><code
+                        class="java keyword">default</code><code class="java plain">-organization-id
+                        </code><code class="java value">1</code> <code class="java plain">\</code></div>
+                    <div class="line number3 index2 alt2"><code class="java spaces">&nbsp;&nbsp;</code><code
+                        class="java plain">--admin </code><code class="java keyword">true</code></div>
+                    <div class="line number4 index3 alt1">&nbsp;</div>
+                    <div class="line number5 index4 alt2">&nbsp;</div>
+                    <div class="line number6 index5 alt1"><code class="java plain">#
+                        cat &lt;&lt; EOT &gt;
+                        /var/lib/jenkins/.hammer/cli_config.yml</code></div>
+                    <div class="line number7 index6 alt2"><code class="java plain">:foreman:</code></div>
+                    <div class="line number8 index7 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">:host: </code><code class="java string">'<a
+                          href="https://localhost/%27">https://localhost/'</a></code></div>
+                    <div class="line number9 index8 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">:username: </code><code class="java string">'svc-jenkins'</code></div>
+                    <div class="line number10 index9 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">:password: </code><code class="java string">'jks_Passw0rd'</code></div>
+                    <div class="line number11 index10 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code
+                        class="java plain">:request_timeout: </code><code class="java value">300</code></div>
+                    <div class="line number12 index11 alt1"><code class="java plain">EOT</code></div>
+                  </div>
+                  <p> </p>
+                  <p>Finally, on the Jenkins server, copy the SSH key to the
+                    Satellite server</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        su - jenkins</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">$
+                        ssh-copy-id svc-jenkins@&lt;satellite&gt;</code></div>
+                  </div>
+                  <p> </p>
+                  <p>Verify that the jenkins user can ssh from the Jenkins
+                    server to the Satellite as the svc-jenkins user without a
+                    password. </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                </div>
+              </div>
+              <p></p>
+              <p></p>
+              <p><a class="external-link" href="https://github.com/RedHatEMEA/soe-ci"
+                  rel="nofollow"></a></p>
+              <p></p>
+              <p></p>
+            </div>
+          </div>
+        </div>
+        <div class="yui-b"><a href="RHEL_SOE_Builder.html">Overview</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Setup</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="git_setup.html">Git
+            Server</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="jenkins_master.html">Jenkins
+            Master</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="jenkins_slave.html">Jenkins
+            Slave</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="satellite.html">Satellite
+            6</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; vSphere</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Deploying the pipeline</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; Script Approvals</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Configuration</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Building the SOE</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+      </div>
+      <div id="ft">
+        <p><br>
+        </p>
+        <p><br>
+        </p>
+        <p><br>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
