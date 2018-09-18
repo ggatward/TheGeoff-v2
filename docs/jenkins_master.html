@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Jenkins Master Setup</title>
+    <style type="text/css">/*
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.6.0
+*/
+html{color:#000;background:#FFF;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}del,ins{text-decoration:none;}body{font:13px/1.231 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}body{text-align:center;}#ft{clear:both;}#doc,#doc2,#doc3,#doc4,.yui-t1,.yui-t2,.yui-t3,.yui-t4,.yui-t5,.yui-t6,.yui-t7{margin:auto;text-align:left;width:57.69em;*width:56.25em;min-width:750px;}#doc2{width:73.076em;*width:71.25em;}#doc3{margin:auto 10px;width:auto;}#doc4{width:74.923em;*width:73.05em;}.yui-b{position:relative;}.yui-b{_position:static;}#yui-main .yui-b{position:static;}#yui-main,.yui-g .yui-u .yui-g{width:100%;}{width:100%;}.yui-t1 #yui-main,.yui-t2 #yui-main,.yui-t3 #yui-main{float:right;margin-left:-25em;}.yui-t4 #yui-main,.yui-t5 #yui-main,.yui-t6 #yui-main{float:left;margin-right:-25em;}.yui-t1 .yui-b{float:left;width:12.30769em;*width:12.00em;}.yui-t1 #yui-main .yui-b{margin-left:13.30769em;*margin-left:13.05em;}.yui-t2 .yui-b{float:left;width:13.8461em;*width:13.50em;}.yui-t2 #yui-main .yui-b{margin-left:14.8461em;*margin-left:14.55em;}.yui-t3 .yui-b{float:left;width:23.0769em;*width:22.50em;}.yui-t3 #yui-main .yui-b{margin-left:24.0769em;*margin-left:23.62em;}.yui-t4 .yui-b{float:right;width:13.8456em;*width:13.50em;}.yui-t4 #yui-main .yui-b{margin-right:14.8456em;*margin-right:14.55em;}.yui-t5 .yui-b{float:right;width:18.4615em;*width:18.00em;}.yui-t5 #yui-main .yui-b{margin-right:19.4615em;*margin-right:19.125em;}.yui-t6 .yui-b{float:right;width:23.0769em;*width:22.50em;}.yui-t6 #yui-main .yui-b{margin-right:24.0769em;*margin-right:23.62em;}.yui-t7 #yui-main .yui-b{display:block;margin:0 0 1em 0;}#yui-main .yui-b{float:none;width:auto;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf,.yui-gc .yui-u,.yui-gd .yui-g,.yui-g .yui-gc .yui-u,.yui-ge .yui-u,.yui-ge .yui-g,.yui-gf .yui-g,.yui-gf .yui-u{float:right;}.yui-g div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first,.yui-ge div.first,.yui-gf div.first,.yui-g .yui-gc div.first,.yui-g .yui-ge div.first,.yui-gc div.first div.first{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf{width:49.1%;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{width:32%;margin-left:1.99%;}.yui-gb .yui-u{*margin-left:1.9%;*width:31.9%;}.yui-gc div.first,.yui-gd .yui-u{width:66%;}.yui-gd div.first{width:32%;}.yui-ge div.first,.yui-gf .yui-u{width:74.2%;}.yui-ge .yui-u,.yui-gf div.first{width:24%;}.yui-g .yui-gb div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first{margin-left:0;}.yui-g .yui-g .yui-u,.yui-gb .yui-g .yui-u,.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u,.yui-ge .yui-g .yui-u,.yui-gf .yui-g .yui-u{width:49%;*width:48.1%;*margin-left:0;}.yui-g .yui-g .yui-u{width:48.1%;}.yui-g .yui-gb div.first,.yui-gb .yui-gb div.first{*margin-right:0;*width:32%;_width:31.7%;}.yui-g .yui-gc div.first,.yui-gd .yui-g{width:66%;}.yui-gb .yui-g div.first{*margin-right:4%;_margin-right:1.3%;}.yui-gb .yui-gc div.first,.yui-gb .yui-gd div.first{*margin-right:0;}.yui-gb .yui-gb .yui-u,.yui-gb .yui-gc .yui-u{*margin-left:1.8%;_margin-left:4%;}.yui-g .yui-gb .yui-u{_margin-left:1.0%;}.yui-gb .yui-gd .yui-u{*width:66%;_width:61.2%;}.yui-gb .yui-gd div.first{*width:31%;_width:29.5%;}.yui-g .yui-gc .yui-u,.yui-gb .yui-gc .yui-u{width:32%;_float:right;margin-right:0;_margin-left:0;}.yui-gb .yui-gc div.first{width:66%;*float:left;*margin-left:0;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf .yui-u{margin:0;}.yui-gb .yui-gb .yui-u{_margin-left:.7%;}.yui-gb .yui-g div.first,.yui-gb .yui-gb div.first{*margin-left:0;}.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u{*width:48.1%;*margin-left:0;} .yui-gb .yui-gd div.first{width:32%;}.yui-g .yui-gd div.first{_width:29.9%;}.yui-ge .yui-g{width:24%;}.yui-gf .yui-g{width:74.2%;}.yui-gb .yui-ge div.yui-u,.yui-gb .yui-gf div.yui-u{float:right;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf div.first{float:left;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf div.first{*width:24%;_width:20%;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf .yui-u{*width:73.5%;_width:65.5%;}.yui-ge div.first .yui-gd .yui-u{width:65%;}.yui-ge div.first .yui-gd div.first{width:32%;}#bd:after,.yui-g:after,.yui-gb:after,.yui-gc:after,.yui-gd:after,.yui-ge:after,.yui-gf:after{content:".";display:block;height:0;clear:both;visibility:hidden;}#bd,.yui-g,.yui-gb,.yui-gc,.yui-gd,.yui-ge,.yui-gf{zoom:1;}</style>
+    <style type="text/css">/*
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.6.0
+*/
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;} em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+</style><meta name="author" content="Geoff Gatward">
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+  </head>
+  <body>
+    <div id="doc3" class="yui-t1">
+      <div id="hd">
+        <h1 style="text-align: center;">Jenkins Master Setup</h1>
+      </div>
+      <div id="bd">
+        <div id="yui-main">
+          <div class="yui-b">
+            <div class="yui-g">
+              <h2 id="InstallingJenkins(Master)-BuildOS">Build OS</h2>
+              <p>If using a VM for Jenkins, it needs to have at least 4Gb RAM
+                and 50Gb available in /var/lib/jenkins.</p>
+              <div class="confluence-information-macro confluence-information-macro-information conf-macro output-block"
+                data-hasbody="true" data-macro-name="info" data-macro-id="723de137-8f84-4e8b-8fdb-ee6c15e46f7e"><span
+                  class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon">
+                </span>
+                <div class="confluence-information-macro-body">
+                  <p><span style="color: #8d468d;"><i>We are not covering the
+                        build of a VM for Jenkins here - once the machine is
+                        built with a basic RHEL 7 OS the following applies.</i></span></p>
+                </div>
+              </div>
+              <p>We need the following repositories enabled:</p>
+              <ul>
+                <li>RHEL 7 Server</li>
+                <li>RHEL 7 Server Optional</li>
+                <li>RHEL 7 Satellite Tools</li>
+                <li>EPEL 7</li>
+                <li>Jenkins&nbsp;&nbsp;</li>
+              </ul>
+              <p>Assuming that we are getting content from Red Hat (CDN or
+                Satellite):</p>
+              <div class="container" title="Hint: double-click to select code" style="margin-left: 40px;">
+                <div class="line number1 index0 alt2"><code class="java plain">#
+                    subscription-manager repos --enable rhel-server-</code><code
+                    class="java value">7</code><code class="java plain">-rpms
+                    --enable rhel-server-</code><code class="java value">7</code><code
+                    class="java plain">-optional-rpms --enable rhel-</code><code
+                    class="java value">7</code><code class="java plain">-server-satellite-</code><code
+                    class="java value">6.2</code><code class="java plain">-rpms</code></div>
+              </div>
+              <p></p>
+              <p>If we have an internet connection and can access EPEL/Jenkins
+                directly:</p>
+              <div class="container" title="Hint: double-click to select code" style="margin-left: 40px;">
+                <div class="line number1 index0 alt2"><code class="java plain">#
+                    rpm --</code><code class="java keyword">import</code> <code
+                    class="java plain">https:</code><code class="java comments">//pkg.jenkins.io/redhat/jenkins.io.key</code></div>
+                <div class="line number2 index1 alt1"><code class="java plain">#
+                    cat &lt;&lt; EOT &gt; /etc/yum.repos.d/jenkins.repo</code></div>
+                <div class="line number3 index2 alt2"><code class="java plain">[jenkins]</code></div>
+                <div class="line number4 index3 alt1"><code class="java plain">name=Jenkins</code></div>
+                <div class="line number5 index4 alt2"><code class="java plain">baseurl=http:</code><code
+                    class="java comments">//pkg.jenkins.io/redhat</code></div>
+                <div class="line number6 index5 alt1"><code class="java plain">gpgcheck=</code><code
+                    class="java value">1</code></div>
+                <div class="line number7 index6 alt2"><code class="java plain">EOT</code></div>
+                <div class="line number8 index7 alt1">&nbsp;</div>
+                <div class="line number9 index8 alt2"><code class="java plain">#
+                    rpm --</code><code class="java keyword">import</code> <code
+                    class="java plain">https:</code><code class="java comments">//dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7</code></div>
+                <div class="line number10 index9 alt1"><code class="java plain">#
+                    cat &lt;&lt; EOT &gt; /etc/yum.repos.d/epel.repo</code></div>
+                <div class="line number11 index10 alt2"><code class="java plain">[jenkins]</code></div>
+                <div class="line number12 index11 alt1"><code class="java plain">name=EPEL</code></div>
+                <div class="line number13 index12 alt2"><code class="java plain">baseurl=https:</code><code
+                    class="java comments">//dl.fedoraproject.org/pub/epel/7/x86_64</code></div>
+                <div class="line number14 index13 alt1"><code class="java plain">gpgcheck=</code><code
+                    class="java value">1</code></div>
+                <div class="line number15 index14 alt2"><code class="java plain">EOT</code></div>
+              </div>
+              <p></p>
+              <h2 id="InstallingJenkins(Master)-InstallJenkins">Install Jenkins</h2>
+              <p>Jenkins is built on Java, so requires a JRE to be installed.
+                The default RHEL openjdk 1.8 works well and should be used.</p>
+              <p>Install the additional RPM's required for Jenkins and our
+                specific project use case</p>
+              <p></p>
+              <div class="container" title="Hint: double-click to select code" style="margin-left: 40px;">
+                <div class="line number1 index0 alt2"><code class="java plain">yum
+                    -y install git nc java-</code><code class="java value">1.8</code><code
+                    class="java plain">.</code><code class="java value">0</code><code
+                    class="java plain">-openjdk jenkins ansible python2-pyvmomi
+                    python2-pip</code></div>
+              </div>
+              <p></p>
+              <p>This project requires the use of 'pyshpere', which is not
+                available as an RPM. To install this package we need to use the
+                pip installer. We are setting the umask here as some base OS
+                installations may have hardened this.</p>
+              <code class="java plain"></code>
+              <p></p>
+              <div class="container" title="Hint: double-click to select code" style="margin-left: 40px;">
+                <div class="line number1 index0 alt2"><code class="java plain">umask
+                    </code><code class="java value">0022</code></div>
+                <div class="line number2 index1 alt1"><code class="java plain">pip
+                    install pysphere</code></div>
+              </div>
+              <p></p>
+              <p><span style="color: #8d468d;">In a disconnected environment
+                  without a PyPI mirror, you will need to download the pysphere
+                  source from <a href="https://github.com/argos83/pysphere/archive/master.zip"
+                    class="external-link" rel="nofollow">https://github.com/argos83/pysphere/archive/master.zip</a>
+                  and install it manually</span></p>
+              <div class="container" title="Hint: double-click to select code" style="margin-left: 40px;">
+                <div class="line number1 index0 alt2"><span style="color: #8d468d;"><code
+                      class="java plain">unzip pysphere.zip</code></span></div>
+                <div class="line number2 index1 alt1"><span style="color: #8d468d;"><code
+                      class="java plain">cd pysphere-master</code></span></div>
+                <div class="line number3 index2 alt2"><span style="color: #8d468d;"><code
+                      class="java plain">python setup.py install</code></span></div>
+              </div>
+              <p></p>
+              <p></p>
+              <p></p>
+              <p>Enable and start the Jenkins service:</p>
+              <div class="container" title="Hint: double-click to select code" style="margin-left: 40px;">
+                <div class="line number1 index0 alt2"><code class="java plain">systemctl
+                    enable jenkins</code></div>
+                <div class="line number2 index1 alt1"><code class="java plain">systemctl
+                    start jenkins</code></div>
+              </div>
+              <div class="container" title="Hint: double-click to select code">
+                <div class="line number2 index1 alt1"><code class="java plain"></code><br>
+                  Open port 8080 in the firewall:</div>
+                <div class="line number2 index1 alt1"><br>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">firewall-cmd
+                        --permanent --add-port </code><code class="java value">8080</code><code
+                        class="java plain">/tcp &amp;&amp; firewall-cmd --reload</code></div>
+                  </div>
+                </div>
+                <div class="line number2 index1 alt1"><code class="java plain"><br>
+                  </code></div>
+                <div class="line number2 index1 alt1"><br>
+                  <h2 id="InstallingJenkins(Master)-InitialJenkinsLogin">Initial
+                    Jenkins Login</h2>
+                  <p>Navigate to the Jenkins URL&nbsp; <a href="http://jenkins.example.org/8080."
+                      class="external-link" rel="nofollow">http://jenkins.example.org/8080.</a>&nbsp;&nbsp;
+                    On first login, you will be prompted to run through the
+                    initial setup wizard. Follow the wizard:</p>
+                  <ul>
+                    <li>Note the admin password in
+                      /var/lib/jenkins/secrets/initialAdminPassword - we will
+                      need this until authentication is set up.</li>
+                    <li>Select the plugins to install - UNCHECK everything (i.e.
+                      no plugins)</li>
+                    <li>Don't create a user - click 'continue as admin'</li>
+                  </ul>
+                  <h2 id="InstallingJenkins(Master)-InstallJenkinsPlugins">Install
+                    Jenkins Plugins</h2>
+                  <p>For this project, the following plugins need to be
+                    installed.&nbsp; Note that many of these plugins also have
+                    dependencies - using the online method below these
+                    dependencies will be automatically resolved.</p>
+                </div>
+                <div class="line number2 index1 alt1"><br>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">Active
+                        Directory plugin</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">Ansible
+                        plugin</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">AnsiColor</code></div>
+                    <div class="line number4 index3 alt1"><code class="java plain">Bitbucket
+                        Plugin</code></div>
+                    <div class="line number5 index4 alt2"><code class="java plain">Blue
+                        Ocean</code></div>
+                    <div class="line number6 index5 alt1"><code class="java plain">build
+                        timeout plugin</code></div>
+                    <div class="line number7 index6 alt2"><code class="java plain">Build
+                        Trigger Badge Plugin</code></div>
+                    <div class="line number8 index7 alt1"><code class="java plain">Clone
+                        Workspace SCM Plugin</code></div>
+                    <div class="line number9 index8 alt2"><code class="java plain">Email
+                        Extension Plugin</code></div>
+                    <div class="line number10 index9 alt1"><code class="java plain">embeddable-build-status</code></div>
+                    <div class="line number11 index10 alt2"><code class="java plain">GitLab
+                        Plugin</code></div>
+                    <div class="line number12 index11 alt1"><code class="java plain">GitLab
+                        Hook Plugin</code></div>
+                    <div class="line number13 index12 alt2"><code class="java plain">Green
+                        Balls</code></div>
+                    <div class="line number14 index13 alt1"><code class="java plain">Groovy
+                        Postbuild</code></div>
+                    <div class="line number15 index14 alt2"><code class="java plain">LDAP
+                        Plugin</code></div>
+                    <div class="line number16 index15 alt1"><code class="java plain">Lockable
+                        Resources Plugin</code></div>
+                    <div class="line number17 index16 alt2"><code class="java plain">Log
+                        Parser Plugin</code></div>
+                    <div class="line number18 index17 alt1"><code class="java plain">Modern
+                        Status</code></div>
+                    <div class="line number19 index18 alt2"><code class="java plain">Pipeline</code></div>
+                    <div class="line number20 index19 alt1"><code class="java plain">Pipeline
+                        Utility Steps</code></div>
+                    <div class="line number21 index20 alt2"><code class="java plain">SSH
+                        Slaves Plugin</code></div>
+                    <div class="line number22 index21 alt1"><code class="java plain">TAP
+                        Plugin</code></div>
+                    <div class="line number23 index22 alt2"><code class="java plain">Test
+                        Results Analyzer Plugin</code></div>
+                    <div class="line number24 index23 alt1"><code class="java plain">vSphere
+                        Plugin</code></div>
+                    <div class="line number25 index24 alt2"><code class="java plain">Workspace
+                        Cleanup Plugin</code></div>
+                  </div>
+                </div>
+                <div class="line number2 index1 alt1"><code class="java plain"><br>
+                  </code></div>
+                <div class="line number2 index1 alt1"><br>
+                  <p><span style="color: rgb(0,0,0);">Once the plugins have been
+                      installed, restart Jenkins.</span></p>
+                  <h3 id="InstallingJenkins(Master)-Onlinemethod">Online method</h3>
+                  <p>In a connected world, Jenkins will be able to connect to
+                    the Plugin mirrors and download/install plugins.
+                    Alternatively, a complete mirror of the plugin repository
+                    may be available inside the organisation.</p>
+                  <p>If there is a proxy between the Jenkins server and the
+                    Internet, this needs to be configured as follows:</p>
+                  <ul>
+                    <li>In the Jenkins WebUI, navigate to Manage Jenkins →
+                      Plugin Manager, then click on the 'Advanced' tab.</li>
+                    <li>Fill in the Server and Port details, and if required the
+                      Username/password for the proxy.</li>
+                  </ul>
+                </div>
+                <div style="margin-left: 40px;"><img src="images/jenkins1.png" alt=""></div>
+                <div class="line number2 index1 alt1"><code class="java plain"><br>
+                  </code></div>
+                <div class="line number2 index1 alt1"><br>
+                  <div class="confluence-information-macro-body">
+                    <p><span style="color: #8d468d;">If the customer has a proxy
+                        with an ACL, the Jenkins server will need access to the
+                        following sites:</span></p>
+                    <ul>
+                      <li>
+                        <pre><span style="color: #8d468d;">updates.jenkins-ci.org</span></pre>
+                      </li>
+                      <li>
+                        <pre><span style="color: #8d468d;">mirrors.jenkins-ci.org</span></pre>
+                      </li>
+                      <li>
+                        <pre><span style="color: #8d468d;">archives.jenkins-ci.org</span></pre>
+                      </li>
+                      <li>
+                        <pre><span style="color: #8d468d;">ftp-chi.osuosl.org</span></pre>
+                      </li>
+                      <li>
+                        <pre><span style="color: #8d468d;">ftp-nyc.osuosl.org</span></pre>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="line number2 index1 alt1"><br>
+                  <h3 id="InstallingJenkins(Master)-Offlinemethod">Offline
+                    method</h3>
+                  <p>In some cases, Jenkins may have no way of connecting to a
+                    plugin server. In this case, it is easiest to install a
+                    Jenkins instance on a server with internet access, install
+                    the required plugins and then copy the
+                    /var/lib/jenkins/plugins&nbsp; directory to the disconnected
+                    Jenkins server.</p>
+                  <p><br>
+                  </p>
+                  <h2 id="InstallingJenkins(Master)-ConfigureAuthenticationMethod">Configure
+                    Authentication Method</h2>
+                  <p>In the Jenkins WebUI, navigate to Manage Jenkins →
+                    Configure Global Security.</p>
+                  <p>Depending on which authentication method is required,
+                    follow the relevent section below.</p>
+                  <h3 id="InstallingJenkins(Master)-PosixLDAP">Posix LDAP</h3>
+                  <p>In the 'Access Control - Security Realm' section, select
+                    the LDAP option and fill in the fields as shown. (In this
+                    case the Manager password is left blank - it is not
+                    required)</p>
+                  <p>&lt;jenkins_ldap&gt;</p>
+                  <p><br>
+                  </p>
+                  <h3 id="InstallingJenkins(Master)-ActiveDirectory">Active
+                    Directory</h3>
+                  <p>In the 'Access Control - Security Realm' section, select
+                    the Active Directory option, then the 'Advanced' button and
+                    fill in the required fields.</p>
+                  <p>Depending on the AD implementation, you may need to specify
+                    the Bind DN and Password of a user authorised to query AD</p>
+                </div>
+                <div style="margin-left: 40px;"><img src="images/jenkins_ad.png"
+                    alt=""></div>
+                <div class="line number2 index1 alt1"><br>
+                  Click the 'Test' button and confirm that connection to Active
+                  Directory is successful.</div>
+                <div class="line number2 index1 alt1"><code class="java plain"><br>
+                  </code></div>
+                <div class="line number2 index1 alt1"><br>
+                  <h2 id="InstallingJenkins(Master)-ConfigureProjectAuthorisation">Configure
+                    Project Authorisation</h2>
+                  <p>In the 'Access Control - Authorization' section, Select the
+                    'Project-based Matrix Authorization Strategy' and populate
+                    the access table with the users/groups that will have global
+                    access to Jenkins.</p>
+                  <p>Using this method, seperate projects can have thier own
+                    authorization.&nbsp; Make sure that the Administrators have
+                    at least Read and Administrator access, or everyone will be
+                    locked out.</p>
+                  <div style="margin-left: 40px;"><img src="images/jenkins_auth.png"
+                      alt=""></div>
+                  <p>At this point, you should be able to logout of the
+                    temporary local admin account and login with a corporately
+                    authenticated admin user.</p>
+                  <h2 id="InstallingJenkins(Master)-ConfigureGlobalParameters">Configure
+                    Global Parameters</h2>
+                  <p>A number of global parameters now need to be configured. In
+                    the WebUI, navigate to&nbsp; Manage Jenkins → Configure
+                    System.</p>
+                  <ul>
+                    <li>In the 'Usage Statistics' section, untick the option
+                      'Help make Jenkins better by sending anonymous usage
+                      statistics and crash reports to the Jenkins project'.</li>
+                    <li>In the 'Jenkins Location' section, set the Admin email
+                      address to something appropriate.</li>
+                    <li>In the 'Extended Email Notification' section, set the
+                      SMTP server and default user Email Suffix as required.</li>
+                    <li>In the 'Email Notification' section, set the SMTP server
+                      and default user Email Suffix as required.</li>
+                    <li>In the main section, set the Labels as 'master'</li>
+                  </ul>
+                  <p></p>
+                  <div class="confluence-information-macro-body">
+                    <p><span style="color: #8d468d;">One executor will be used
+                        for each action within the project. In this project we
+                        have several stages that run parallel tasks that build
+                        and test hosts. If all executors are busy, jobs will
+                        queue until an executor is available.</span></p>
+                    <p><span style="color: #8d468d;">If the Jenkins server is
+                        shared with other projects it is recommended that a
+                        dedicated slave be configured with enough executors to
+                        handle all of the parallel activities, leaving the
+                        master node free to orchestrate this and other projects.</span></p>
+                  </div>
+                  <p></p>
+                  <p class="auto-cursor-target">If the&nbsp;Jenkins Master
+                    server is going to be used to build this project, configure
+                    the options below.&nbsp;</p>
+                  <ul>
+                    <li class="auto-cursor-target">At the top of the main
+                      section, set the '# of executors' to be 2x the number of
+                      CPU cores on the host.</li>
+                    <li class="auto-cursor-target">Set the 'Labels' to the
+                      string 'master, soe'</li>
+                  </ul>
+                  <p></p>
+                  <div class="confluence-information-macro-body">
+                    <p><span style="color: #8d468d;">This project can be
+                        configured so that Jenkins integrates directly with
+                        vCenter to power cycle VM's, or this can be performed
+                        via Jenkins → Satellite → vCenter integration.</span></p>
+                    <p><span style="color: #8d468d;">If Jenkins &lt;&gt; vCenter
+                        integration is used, the vCenter credentials need to be
+                        stored in the Jenkins credential store.</span></p>
+                  </div>
+                  <p></p>
+                  <p class="auto-cursor-target">If Jenkins is going to be
+                    integrating directly to vCenter, configure the options
+                    below.</p>
+                  <ul>
+                    <li>Under the 'Cloud' section, click 'Add a new cloud -
+                      vSphere cloud</li>
+                    <li><span style="color: rgb(0,0,0);">The name of the cloud
+                        used in the pipeline is 'vcenter_server' - this must
+                        match here. Enter the vCenter hostname.</span></li>
+                  </ul>
+                  <p></p>
+                  <div style="margin-left: 40px;"><img src="images/jenkins_vs1.png"
+                      alt=""></div>
+                  <ul>
+                    <li>Next to Credentials, click the Add button, and select
+                      the Jenkins domain.</li>
+                    <li>Enter the details for the vCenter credentials as shown.
+                      The 'ID' must be JenkinsVmw, as this is coded into the
+                      pipeline.</li>
+                  </ul>
+                  <p></p>
+                  <div style="margin-left: 40px;"><img src="images/jenkins_vs2.png"
+                      alt=""></div>
+                  <ul>
+                    <li>Click the Test Connection button and verify that the
+                      connection to vCenter is successful.</li>
+                  </ul>
+                  <p><br>
+                  </p>
+                  <h2 id="InstallingJenkins(Master)-EnablingHTTPSaccess">Enabling
+                    HTTPS access</h2>
+                  <p>By default Jenkins only accepts HTTP connections on port
+                    8080. To enable secure connections over HTTPS the following
+                    steps need to be performed.</p>
+                  <p class="auto-cursor-target">Create a new SSL certificate for
+                    Jenkins. The example below is self-signed, but a corporately
+                    signed certificate should be a similar process.</p>
+                  <p></p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        Generate a </code><code class="java keyword">new</code>
+                      <code class="java plain">self-signed certificate</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">openssl
+                        req -x509 -newkey rsa:</code><code class="java value">2048</code>
+                      <code class="java plain">-keyout /etc/pki/tls/</code><code
+                        class="java keyword">private</code><code class="java plain">/jenkins.key
+                        -out /etc/pki/tls/certs/jenkins.pem -days </code><code
+                        class="java value">3650</code></div>
+                    <div class="line number3 index2 alt2">&nbsp;</div>
+                    <div class="line number4 index3 alt1"><code class="java plain">#
+                        Bundle the key and cert into a pkcs12 bundle</code></div>
+                    <div class="line number5 index4 alt2"><code class="java plain">openssl
+                        pkcs12 -inkey /etc/pki/tls/</code><code class="java keyword">private</code><code
+                        class="java plain">/jenkins.key -in
+                        /etc/pki/tls/certs/jenkins.pem -export -out
+                        /etc/pki/tls/certs/jenkins.pkcs12</code></div>
+                    <div class="line number6 index5 alt1">&nbsp;</div>
+                    <div class="line number7 index6 alt2"><code class="java plain">#
+                        Create the Java keystore</code></div>
+                    <div class="line number8 index7 alt1"><code class="java plain">keytool
+                        -importkeystore -srckeystore
+                        /etc/pki/tls/certs/jenkins.pkcs12 -destkeystore
+                        /etc/pki/java/jenkins.jks</code></div>
+                    <div class="line number9 index8 alt2"><code class="java plain">chmod
+                        </code><code class="java value">644</code> <code class="java plain">/etc/pki/java/jenkins.jks</code></div>
+                  </div>
+                  <p></p>
+                  <p>Next, modify the Jenkins configuration to use the
+                    certificates. Config file is /etc/sysconfig/jenkins - these
+                    parameters will be in the default config but will not be
+                    populated.</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">JENKINS_HTTPS_PORT=</code><code
+                        class="java string">"8443"</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">JENKINS_HTTPS_KEYSTORE=</code><code
+                        class="java string">"/etc/pki/java/jenkins.jks"</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">JENKINS_HTTPS_KEYSTORE_PASSWORD=</code><code
+                        class="java string">"*********"</code></div>
+                    <div class="line number4 index3 alt1"><code class="java plain">JENKINS_HTTPS_LISTEN_ADDRESS=</code><code
+                        class="java string">"0.0.0.0"</code></div>
+                  </div>
+                  <p></p>
+                  <p>Restart Jenkins and verify it is now listening on port 8443</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">#
+                        systemctl restart jenkins</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">#
+                        netstat -tnlp | grep </code><code class="java value">8443</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">tcp&nbsp;&nbsp;&nbsp;&nbsp;
+                        </code><code class="java value">0</code>&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">0</code> <code class="java value">0.0</code><code
+                        class="java plain">.</code><code class="java value">0.0</code><code
+                        class="java plain">:</code><code class="java value">8443</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <code class="java value">0.0</code><code class="java plain">.</code><code
+                        class="java value">0.0</code><code class="java plain">:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        LISTEN&nbsp;&nbsp;&nbsp;&nbsp; </code><code class="java value">24108</code><code
+                        class="java plain">/java</code></div>
+                  </div>
+                  <p></p>
+                  <p>Allow port 8443 through the firewall, and remove port 8080
+                    (unless unencrypted HTTP access is still required)</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">firewall-cmd
+                        --permanent --add-port </code><code class="java value">8443</code><code
+                        class="java plain">/tcp</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">firewall-cmd
+                        --permanent --remove-port </code><code class="java value">8080</code><code
+                        class="java plain">/tcp</code></div>
+                    <div class="line number3 index2 alt2"><code class="java plain">firewall-cmd
+                        --reload</code></div>
+                  </div>
+                  <p></p>
+                  <ul>
+                    <li>
+                      <p class="auto-cursor-target">In the WebUI, navigate to
+                        Manage Jenkins&nbsp;→ Configure System. &nbsp;Change the
+                        Jenkins URL under the 'Jenkins Location' section to the
+                        HTTPS URI and port.</p>
+                    </li>
+                  </ul>
+                  <h2 id="InstallingJenkins(Master)-CreateJenkinsSSHkeys">Create
+                    Jenkins SSH keys</h2>
+                  <p>Jenkins uses SSH to communicate with Jenkins slaves as well
+                    as to other servers such as Git and Satellite to perform
+                    tasks related to the project pipeline. To allow this
+                    interaction the 'jenkins' user needs to have SSH keys
+                    created to allow passwordless login to those services.</p>
+                  <p class="auto-cursor-target">On the OS, su to the jenkins
+                    user and use ssh-keygen to generate an ssh keypair - do not
+                    enter a passphrase.</p>
+                  <p style="margin-left: 40px;"></p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">su
+                        - jenkins -s /bin/bash</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">ssh-keygen
+                        -t rsa</code></div>
+                  </div>
+                  <p></p>
+                  <p>Push the Jenkins SSH keys to all slaves</p>
+                  <div class="container" title="Hint: double-click to select code"
+                    style="margin-left: 40px;">
+                    <div class="line number1 index0 alt2"><code class="java plain">su
+                        - jenkins -s /bin/bash</code></div>
+                    <div class="line number2 index1 alt1"><code class="java plain">ssh-copy-id
+                        &lt;slave FQDN&gt;</code></div>
+                  </div>
+                  <p></p>
+                  <h2 id="InstallingJenkins(Master)-SettingupCredentialStore">Setting
+                    up Credential Store</h2>
+                  <p>To avoid saving and sending plain-text passwords, we make
+                    use of the Jenkins credential store. Once in the store,
+                    passwords are able to be referenced and are passed to jobs
+                    in hashed formats.</p>
+                  <ul>
+                    <li>In the Jenkins WebUI, navigate to Credentials →
+                      System&nbsp;→ Global credentials (unrestricted)</li>
+                    <li>Click Add Credentials, then set the 'kind' to 'SSH
+                      Username with private key'.&nbsp; Fill in the details as
+                      below and save the record.</li>
+                  </ul>
+                  <p></p>
+                  <div style="margin-left: 40px;"><img src="images/jenkins_auth2.png"
+                      alt=""></div>
+                  <ul>
+                    <li>Navigate to Credentials → System → Add domain.
+                      &nbsp;Create a new domain called 'RHEL SOE'.</li>
+                    <li>
+                      <p class="auto-cursor-target">Within the RHEL SOE domain,
+                        click 'Add Credentials' and add a 'Username with
+                        Password'&nbsp;type with the following settings
+                        &nbsp;(Set the desired root password for the hosts)</p>
+                    </li>
+                  </ul>
+                  <p></p>
+                  <p><span style="color: #8d468d;">This is the root password
+                      used by Jenkins to access the build test hosts, and must
+                      match the root password defined in Satellite for the SOE
+                      Host Groups. The ID is used internally by the pipeline and
+                      must be set as shown.</span></p>
+                  <div style="margin-left: 40px;"><img src="images/jenkins_auth3.png"
+                      alt=""></div>
+                  <h2 id="InstallingJenkins(Master)-ConfiguringTools">Configuring
+                    Tools</h2>
+                  <p>This Jenkins project makes use of Ansible to execute some
+                    of the calls between Jenkins and other platforms. In order
+                    for Jenkins to do this, we need to configure the Ansible
+                    tool within Jenkins.</p>
+                  <p>In the WebUI, navigate to Manage Jenkins&nbsp;→ Global Tool
+                    Configuration</p>
+                  <p>In the 'Ansible' section, click 'Add Ansible', then fill in
+                    the details:</p>
+                  <p></p>
+                  <div style="margin-left: 40px;"><img src="images/jenkins_ansible.png"
+                      alt=""></div>
+                  <h2 id="InstallingJenkins(Master)-ConfiguringWebhooksandGitIntegration">Configuring
+                    Webhooks and Git Integration</h2>
+                  <p>In order to integrate with the Git repository using
+                    webhooks, Jenkins needs some configuration, depending on the
+                    Git server being used.</p>
+                  <h3 id="InstallingJenkins(Master)-GitHub">GitHub</h3>
+                  <p><br>
+                  </p>
+                  <h3 id="InstallingJenkins(Master)-GitLab">GitLab</h3>
+                  <p><br>
+                  </p>
+                  <h3 id="InstallingJenkins(Master)-Bitbucket">Bitbucket</h3>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p></p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                  <p><br>
+                  </p>
+                </div>
+              </div>
+              <p></p>
+              <p></p>
+              <p><a class="external-link" href="https://github.com/RedHatEMEA/soe-ci"
+                  rel="nofollow"></a></p>
+              <p></p>
+              <p></p>
+            </div>
+          </div>
+        </div>
+        <div class="yui-b"><a href="RHEL_SOE_Builder.html">Overview</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Setup</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="git_setup.html">Git
+            Server</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="jenkins_master.html">Jenkins
+            Master</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="jenkins_slave.html">Jenkins
+            Slave</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; <a href="satellite.html">Satellite
+            6</a></div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; vSphere</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Deploying the pipeline</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">&nbsp;&nbsp;&nbsp; Script Approvals</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Configuration</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b">Building the SOE</div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+        <div class="yui-b"><br>
+        </div>
+      </div>
+      <div id="ft">
+        <p><br>
+        </p>
+        <p><br>
+        </p>
+        <p><br>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
