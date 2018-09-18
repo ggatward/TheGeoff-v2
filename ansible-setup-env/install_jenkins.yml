@@ -1,0 +1,5 @@
+---
+
+- name: Install Jenkins
+  include_role:
+    name: geerlingguy.jenkins

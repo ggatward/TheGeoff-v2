@@ -1,0 +1,9 @@
+---
+- name: Build Jenkins
+  hosts: jenkins
+  remote_user: root
+
+  tasks:
+    - include_tasks: setup.yml
+    - include_tasks: install_jenkins.yml
+    
