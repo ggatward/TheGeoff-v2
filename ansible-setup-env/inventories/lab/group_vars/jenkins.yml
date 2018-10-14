@@ -2,4 +2,29 @@
 jenkins_hostname: "{{ ansible_nodename }}"
 jenkins_repo_url: http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo
 jenkins_repo_key_url: http://pkg.jenkins-ci.org/redhat-stable/jenkins-ci.org.key
-jenkins_plugins: []
+jenkins_plugin_timeout: 120
+jenkins_plugins:
+  - active-directory
+  - ansible
+  - ansicolor
+  - bitbucket
+  - blueocean
+  - build-timeout
+  - buildtriggerbadge
+  - clone-workspace-scm
+  - email-ext
+  - embeddable-build-status
+  - gitlab-plugin
+  - greenballs
+  - groovy-postbuild
+  - ldap
+  - lockable-resources
+  - log-parser
+  - modernstatus
+  - workflow-aggregator
+  - pipeline-utility-steps
+  - ssh-slaves
+  - tap
+  - test-results-analyzer
+  - vsphere-cloud
+  - ws-cleanup
